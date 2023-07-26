@@ -119,7 +119,7 @@ class NoobPaginator(discord.ui.View):
 
     @discord.ui.button(label="⏩", style=get_button_colour("grey"))
     async def last_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        self.current_page = len(self.pages)
+        self.current_page = self.max_pages
         await self.update_page(interaction)
 
     async def start(
