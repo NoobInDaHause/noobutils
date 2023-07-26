@@ -168,7 +168,10 @@ class NoobPaginator(discord.ui.View):
         for x in self.children:
             x.disabled = True
         self.stop()
-        await self.message.edit(view=self)
+        if self.message:
+            await self.message.edit(view=self)
+        elif self.interaction:
+            await self.interaction.message.delete()
 
 class NoobConfirmation(discord.ui.View):
     def __init__(self, timeout: Optional[float] = 60.0):
