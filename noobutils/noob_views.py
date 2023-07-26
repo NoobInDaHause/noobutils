@@ -15,7 +15,7 @@ __all__ = (
     "NoobPaginator",
     "NoobConfirmation"
 )
-class Paginator(discord.ui.View):
+class NoobPaginator(discord.ui.View):
     """
     originally from pranoy but i modified to work for red discord bot
 
