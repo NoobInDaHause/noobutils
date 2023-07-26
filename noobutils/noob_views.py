@@ -44,8 +44,6 @@ class NoobPaginator(discord.ui.View):
             total_pages += 1
 
         self.max_pages: int = total_pages
-        self.first_page.disabled = self.current_page <= 0
-        self.previous_page.disabled = self.current_page <= 0
         self.next_page.disabled = self.current_page >= self.max_pages - 1
         self.last_page.disabled = self.current_page >= self.max_pages - 1
 
@@ -93,6 +91,8 @@ class NoobPaginator(discord.ui.View):
             self.message = interaction.message
 
         kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
+        self.first_page.disabled = self.current_page <= 0
+        self.previous_page.disabled = self.current_page <= 0
         self.next_page.disabled = self.current_page >= self.max_pages - 1
         self.last_page.disabled = self.current_page >= self.max_pages - 1
         await interaction.response.edit_message(**kwargs)
