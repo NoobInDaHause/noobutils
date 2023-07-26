@@ -109,9 +109,8 @@ class NoobPaginator(discord.ui.View):
 
     @discord.ui.button(label="⏹️", style=get_button_colour("grey"))
     async def stop_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        if self.message:
-            self.stop()
-            await self.message.delete()
+        self.stop()
+        await interaction.message.delete()
 
     @discord.ui.button(label="▶️", style=get_button_colour("grey"))
     async def next_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
