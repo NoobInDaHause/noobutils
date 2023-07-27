@@ -1,4 +1,4 @@
-with open("version.txt", "r") as vf:
+with open("noobutils/version.txt", "r") as vf:
     __version__ = vf.read()
 
 from .converters import *
