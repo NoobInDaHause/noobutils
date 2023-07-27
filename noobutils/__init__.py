@@ -1,4 +1,6 @@
-with open("noobutils/version.txt", "r") as vf:
+from pathlib import Path
+
+with open(Path(__file__).parent / "version.txt", "r") as vf:
     __version__ = vf.read()
 
 from .converters import *
