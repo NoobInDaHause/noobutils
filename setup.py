@@ -3,11 +3,12 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
-version = "1.0.7"
+with open("noobutils/version.txt", "r") as vf:
+    __version__ = vf.read()
 
 setup(
     name="noobutils",
-    version=version,
+    version=__version__,
     description="Various shared utils and shit for my NoobCogs.",
     packages=find_packages(),
     long_description=long_description,

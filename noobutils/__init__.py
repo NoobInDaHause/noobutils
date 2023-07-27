@@ -1,3 +1,8 @@
-from .noob_converters import *
-from .noob_views import *
-from .noob_utility import *
+from pathlib import Path
+
+with open(Path(__file__).parent / "version.txt", "r") as vf:
+    __version__ = vf.read()
+
+from .converters import *
+from .views import *
+from .utility import *
