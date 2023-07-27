@@ -1,7 +1,4 @@
-from pathlib import Path
-
-with open(Path(__file__).parent / "version.txt", "r") as vf:
-    __version__ = vf.read()
+__version__ = "1.0.12"
 
 from .converters import *
 from .views import *
