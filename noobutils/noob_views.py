@@ -97,29 +97,29 @@ class NoobPaginator(discord.ui.View):
         self.last_page.disabled = self.current_page >= self.max_pages - 1
         await interaction.response.edit_message(**kwargs)
 
-    @discord.ui.button(label="⏪", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
     async def first_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         self.current_page = 0
         await self.update_page(interaction)
 
-    @discord.ui.button(label="◀️", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="◀️", style=get_button_colour("grey"))
     async def previous_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         self.current_page -= 1
         await self.update_page(interaction)
 
-    @discord.ui.button(label="⏹️", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="⏹️", style=get_button_colour("grey"))
     async def stop_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         self.stop()
         await interaction.message.delete()
 
-    @discord.ui.button(label="▶️", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
     async def next_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         self.current_page += 1
         await self.update_page(interaction)
 
-    @discord.ui.button(label="⏩", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="⏩", style=get_button_colour("grey"))
     async def last_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        self.current_page = self.max_pages
+        self.current_page = (self.max_pages - 1)
         await self.update_page(interaction)
 
     async def start(
@@ -171,7 +171,7 @@ class NoobPaginator(discord.ui.View):
         if self.message:
             await self.message.edit(view=self)
         elif self.interaction:
-            await self.interaction.message.delete()
+            await self.interaction.message.edit(view=self)
 
 class NoobConfirmation(discord.ui.View):
     def __init__(self, timeout: Optional[float] = 60.0):
