@@ -131,6 +131,7 @@ class NoobPaginator(discord.ui.View):
     async def start(
         self, obj: Union[commands.Context, discord.Interaction], ephemeral: bool = False
     ) -> Optional[Union[Message, InteractionMessage, WebhookMessage]]:
+        self.ephemeral = ephemeral
         if isinstance(obj, commands.Context):
             self.context = obj
             self.interaction = None
