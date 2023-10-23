@@ -34,6 +34,7 @@ class NoobPaginator(discord.ui.View):
         super().__init__(timeout=timeout)
         self.delete_message_after: bool = delete_message_after
         self.current_page: int = 0
+        self.ephemeral = False
 
         self.context: Optional[commands.Context] = None
         self.interaction: Optional[discord.Interaction] = None
@@ -110,7 +111,12 @@ class NoobPaginator(discord.ui.View):
     @discord.ui.button(emoji="⏹️", style=get_button_colour("grey"))
     async def stop_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         self.stop()
-        await interaction.message.delete()
+        if self.ephemeral:
+            for x in self.children:
+                x.disabled = True
+            await interaction.response.edit_message(view=self)
+        else:
+            await interaction.message.delete()
 
     @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
     async def next_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -123,7 +129,7 @@ class NoobPaginator(discord.ui.View):
         await self.update_page(interaction)
 
     async def start(
-        self, obj: Union[commands.Context, discord.Interaction]
+        self, obj: Union[commands.Context, discord.Interaction], ephemeral: bool = False
     ) -> Optional[Union[Message, InteractionMessage, WebhookMessage]]:
         if isinstance(obj, commands.Context):
             self.context = obj
@@ -144,7 +150,7 @@ class NoobPaginator(discord.ui.View):
                 if self.interaction.response.is_done():
                     self.message = await self.interaction.followup.send(**kwargs, view=self)
                 else:
-                    await self.interaction.response.send_message(**kwargs, view=self)
+                    await self.interaction.response.send_message(**kwargs, ephemeral=ephemeral)
                     self.message = await self.interaction.original_response()
             else:
                 raise RuntimeError(
@@ -153,8 +159,11 @@ class NoobPaginator(discord.ui.View):
         return self.message
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        
         if interaction.user:
-            if await self.context.bot.is_owner(interaction.user):
+            if self.ephemeral:
+                return True
+            elif await self.context.bot.is_owner(interaction.user):
                 return True
             elif interaction.user == self.context.author:
                 return True
