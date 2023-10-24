@@ -7,20 +7,21 @@ from redbot.core import commands
 from typing import Dict, Optional, Union, List, Any, TYPE_CHECKING, Union
 
 from .utility import get_button_colour, access_denied
+from .exceptions import NoContextOrInteractionFound
 
 if TYPE_CHECKING:
     from discord import Message, InteractionMessage, WebhookMessage
 
-__all__ = (
-    "NoobPaginator",
-    "NoobConfirmation"
-)
+__all__ = ("NoobPaginator", "NoobConfirmation")
+
+
 class NoobPaginator(discord.ui.View):
     """
     originally from pranoy but i modified to work for red discord bot
 
     https://github.com/PranoyMajumdar/dispie/blob/main/dispie/paginator/__init__.py
     """
+
     message: Optional[Message] = None
 
     def __init__(
@@ -63,7 +64,7 @@ class NoobPaginator(discord.ui.View):
         if self.per_page == 1:
             return self.pages[page_number]
         base = page_number * self.per_page
-        return self.pages[base: base + self.per_page]
+        return self.pages[base : base + self.per_page]
 
     def format_page(self, page: Any) -> Any:
         return page
@@ -78,8 +79,7 @@ class NoobPaginator(discord.ui.View):
             kwargs["embeds"] = [formatted_page]
         elif isinstance(formatted_page, list):
             if not all(isinstance(embed, discord.Embed) for embed in formatted_page):
-                raise TypeError(
-                    "All elements in the list must be of type Embed")
+                raise TypeError("All elements in the list must be of type Embed")
 
             kwargs["embeds"] = formatted_page
         elif isinstance(formatted_page, dict):
@@ -99,17 +99,23 @@ class NoobPaginator(discord.ui.View):
         await interaction.response.edit_message(**kwargs)
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
-    async def first_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def first_page(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.current_page = 0
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="◀️", style=get_button_colour("grey"))
-    async def previous_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def previous_page(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.current_page -= 1
         await self.update_page(interaction)
 
-    @discord.ui.button(emoji="⏹️", style=get_button_colour("grey"))
-    async def stop_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(emoji="❌", style=get_button_colour("grey"))
+    async def stop_page(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.stop()
         if self.ephemeral:
             for x in self.children:
@@ -119,13 +125,17 @@ class NoobPaginator(discord.ui.View):
             await interaction.message.delete()
 
     @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
-    async def next_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    async def next_page(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         self.current_page += 1
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="⏩", style=get_button_colour("grey"))
-    async def last_page(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        self.current_page = (self.max_pages - 1)
+    async def last_page(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        self.current_page = self.max_pages - 1
         await self.update_page(interaction)
 
     async def start(
@@ -149,30 +159,31 @@ class NoobPaginator(discord.ui.View):
                 self.message = await self.context.send(**kwargs)
             elif self.interaction is not None:
                 if self.interaction.response.is_done():
-                    self.message = await self.interaction.followup.send(**kwargs, view=self)
+                    self.message = await self.interaction.followup.send(
+                        **kwargs, view=self
+                    )
                 else:
-                    await self.interaction.response.send_message(**kwargs, ephemeral=ephemeral)
+                    await self.interaction.response.send_message(
+                        **kwargs, ephemeral=ephemeral
+                    )
                     self.message = await self.interaction.original_response()
             else:
-                raise RuntimeError(
-                    "Cannot start a paginator without a context or interaction.")
+                raise NoContextOrInteractionFound(
+                    "Cannot start a paginator without a context or interaction."
+                )
 
         return self.message
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        
-        if interaction.user:
-            if self.ephemeral:
-                return True
-            elif await self.context.bot.is_owner(interaction.user):
-                return True
-            elif interaction.user == self.context.author:
-                return True
-            else:
-                await interaction.response.send_message(content=access_denied(), ephemeral=True)
-                return False
-        else:
+        if (
+            not interaction.user
+            or self.ephemeral
+            or await self.context.bot.is_owner(interaction.user)
+            or interaction.user == self.context.author
+        ):
             return True
+        await interaction.response.send_message(content=access_denied(), ephemeral=True)
+        return False
 
     async def on_timeout(self):
         for x in self.children:
@@ -180,19 +191,46 @@ class NoobPaginator(discord.ui.View):
         await self.message.edit(view=self)
         self.stop()
 
+
 class NoobConfirmation(discord.ui.View):
     def __init__(self, timeout: Optional[float] = 60.0):
         super().__init__(timeout=timeout)
+        self.ephemeral = False
         self.confirm_action: str = None
         self.context: commands.Context = None
+        self.interaction: discord.Interaction = None
         self.message: discord.Message = None
         self.value = None
 
-    async def start(self, context: commands.Context, confirm_action: str, *args, **kwargs):
-        msg = await context.send(view=self, *args, **kwargs)
-        self.confirm_action = confirm_action
-        self.context = context
-        self.message = msg
+    async def start(
+        self,
+        object: Union[commands.Context, discord.Interaction],
+        confirm_action: str,
+        ephemeral: bool = False,
+        *args,
+        **kwargs,
+    ):
+        if isinstance(object, commands.Context):
+            msg = await object.send(view=self, *args, **kwargs)
+            self.confirm_action = confirm_action
+            self.context = object
+            self.message = msg
+        elif isinstance(object, discord.Interaction):
+            if self.interaction.response.is_done():
+                msg = await self.interaction.followup.send(
+                    view=self, ephemeral=ephemeral, *args, **kwargs
+                )
+            else:
+                await self.interaction.response.send_message(
+                    ephemeral=ephemeral, view=self, *args, **kwargs
+                )
+                msg = await self.interaction.original_response()
+            self.ephemeral = ephemeral
+            self.confirm_action = confirm_action
+            self.interaction = object
+            self.message = msg
+        else:
+            raise NoContextOrInteractionFound("No Context or Interaction found.")
 
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -200,7 +238,9 @@ class NoobConfirmation(discord.ui.View):
             x.disabled = True
         self.value = True
         self.stop()
-        await interaction.response.edit_message(content=self.confirm_action, embed=None, view=self)
+        await interaction.response.edit_message(
+            content=self.confirm_action, embed=None, view=self
+        )
 
     @discord.ui.button(label="No", style=discord.ButtonStyle.red)
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -213,19 +253,20 @@ class NoobConfirmation(discord.ui.View):
         )
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user:
-            if await self.context.bot.is_owner(interaction.user):
-                return True
-            elif interaction.user == self.context.author:
-                return True
-            else:
-                await interaction.response.send_message(content=access_denied(), ephemeral=True)
-                return False
-        else:
+        if (
+            not interaction.user
+            or self.ephemeral
+            or await self.context.bot.is_owner(interaction.user)
+            or interaction.user == self.context.author
+        ):
             return True
+        await interaction.response.send_message(content=access_denied(), ephemeral=True)
+        return False
 
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
         self.stop()
-        await self.message.edit(content="You took too long to respond.", embed=None, view=self)
+        await self.message.edit(
+            content="You took too long to respond.", embed=None, view=self
+        )
