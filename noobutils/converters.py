@@ -1,5 +1,4 @@
 import discord
-import re
 
 from redbot.core.bot import commands
 
@@ -19,6 +18,6 @@ async def noob_emoji_converter(
         EMOJI_DATA[emoji]
         return emoji
     except KeyError:
-        custom_emoji = re.sub(r"[0-9]+", "", emoji)
-        custom_emoji = custom_emoji.replace("<", "").replace(">", "").replace(":", "")
-        return discord.utils.get(context.bot.emojis, name=custom_emoji)
+        custom_emoji = emoji.split(":")
+        custom_emoji = custom_emoji[2].replace(">", "")
+        return discord.utils.get(context.bot.emojis, id=int(custom_emoji))
