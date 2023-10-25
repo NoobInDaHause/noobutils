@@ -4,13 +4,9 @@ from redbot.core.utils import chat_formatting as cf
 
 from typing import Union, List
 
-from .utility import NoobCoordinate
+from .converters import NoobCoordinate
 from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
-
-class NoobCoordinate(dict):
-    def __convert__(self, key):
-        return key
 
 def is_have_avatar(
     thing: Union[discord.Member, discord.Guild] = None, display_av=False
@@ -29,10 +25,11 @@ def is_have_avatar(
 
 
 def access_denied(text_only=False) -> str:
-    if text_only:
-        return "Access Denied."
-    else:
-        return "https://cdn.discordapp.com/attachments/1000751975308197918/1110013262835228814/1.mp4"
+    return (
+        "Access Denied."
+        if text_only
+        else "https://cdn.discordapp.com/attachments/1000751975308197918/1110013262835228814/1.mp4"
+    )
 
 
 def get_button_colour(colour: str) -> discord.ButtonStyle:
