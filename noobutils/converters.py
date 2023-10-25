@@ -12,9 +12,10 @@ class NoobCoordinate(dict):
 
 
 async def noob_emoji_converter(
-    context: commands.Context, emoji: Union[str, int]
+    context: commands.Context, emoji
 ) -> Union[discord.Emoji, str, None]:
     if isinstance(emoji, str):
+        emoji = emoji.strip()
         try:
             EMOJI_DATA[emoji]
             return emoji
