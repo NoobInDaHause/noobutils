@@ -4,9 +4,13 @@ from redbot.core.utils import chat_formatting as cf
 
 from typing import Union, List
 
-from .converters import NoobCoordinate
+from .utility import NoobCoordinate
 from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
+
+class NoobCoordinate(dict):
+    def __convert__(self, key):
+        return key
 
 def is_have_avatar(
     thing: Union[discord.Member, discord.Guild] = None, display_av=False

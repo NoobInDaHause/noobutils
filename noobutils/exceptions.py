@@ -12,7 +12,3 @@ class MemberOrGuildNotFound(NoobException):
 
 class NoContextOrInteractionFound(NoobException):
     pass
-
-
-class UnknownEmoji(NoobException):
-    pass
