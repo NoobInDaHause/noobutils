@@ -19,5 +19,11 @@ async def noob_emoji_converter(
         return emoji
     except KeyError:
         custom_emoji = emoji.split(":")
+        if len(custom_emoji) < 2:
+            return None
         custom_emoji = custom_emoji[2].replace(">", "")
-        return discord.utils.get(context.bot.emojis, id=int(custom_emoji))
+        try:
+            d = int(custom_emoji)
+            return discord.utils.get(context.bot.emojis, id=d)
+        except Exception:
+            return None
