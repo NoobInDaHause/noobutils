@@ -12,18 +12,23 @@ class NoobCoordinate(dict):
 
 
 async def noob_emoji_converter(
-    context: commands.Context, emoji: str
+    context: commands.Context, emoji: Union[str, int]
 ) -> Union[discord.Emoji, str, None]:
-    try:
-        EMOJI_DATA[emoji]
-        return emoji
-    except KeyError:
-        custom_emoji = emoji.split(":")
-        if len(custom_emoji) < 2:
-            return None
-        custom_emoji = custom_emoji[2].replace(">", "")
+    if isinstance(emoji, str):
         try:
-            d = int(custom_emoji)
-            return discord.utils.get(context.bot.emojis, id=d)
-        except Exception:
-            return None
+            EMOJI_DATA[emoji]
+            return emoji
+        except KeyError:
+            custom_emoji = emoji.split(":")
+            if len(custom_emoji) < 2:
+                return None
+            custom_emoji = custom_emoji[2].replace(">", "")
+            try:
+                d = int(custom_emoji)
+                return discord.utils.get(context.bot.emojis, id=d)
+            except Exception:
+                return None
+    elif isinstance(emoji, int):
+        return discord.utils.get(context.bot.emojis, id=emoji)
+    else:
+        return None
