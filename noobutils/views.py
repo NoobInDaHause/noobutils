@@ -216,6 +216,7 @@ class NoobConfirmation(discord.ui.View):
             self.context = object
             self.message = msg
         elif isinstance(object, discord.Interaction):
+            self.interaction = object
             if self.interaction.response.is_done():
                 msg = await self.interaction.followup.send(
                     view=self, ephemeral=ephemeral, *args, **kwargs
