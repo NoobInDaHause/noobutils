@@ -202,34 +202,27 @@ class NoobConfirmation(discord.ui.View):
         self.message: discord.Message = None
         self.value = None
 
-    async def start(
-        self,
-        object: Union[commands.Context, discord.Interaction],
-        confirm_action: str,
-        ephemeral: bool = False,
-        *args,
-        **kwargs,
-    ):
-        if isinstance(object, commands.Context):
-            msg = await object.send(view=self, *args, **kwargs)
-            self.confirm_action = confirm_action
-            self.context = object
-            self.message = msg
-        elif isinstance(object, discord.Interaction):
-            self.interaction = object
-            if self.interaction.response.is_done():
-                msg = await self.interaction.followup.send(
-                    view=self, ephemeral=ephemeral, *args, **kwargs
-                )
+    async def start(self, obj, confirm_action, ephemeral=False, *args, **kwargs):
+        if isinstance(obj, (commands.Context, discord.Interaction)):
+            if isinstance(obj, commands.Context):
+                self.context = obj
+                self.interaction = None
+                msg = await obj.send(view=self, *args, **kwargs)
             else:
-                await self.interaction.response.send_message(
-                    ephemeral=ephemeral, view=self, *args, **kwargs
-                )
-                msg = await self.interaction.original_response()
+                self.interaction = obj
+                self.context = None
+                if self.interaction.response.is_done():
+                    msg = await self.interaction.followup.send(
+                        view=self, ephemeral=ephemeral, *args, **kwargs
+                    )
+                else:
+                    await self.interaction.response.send_message(
+                        ephemeral=ephemeral, view=self, *args, **kwargs
+                    )
+                    msg = await self.interaction.original_response()
+            self.message = msg
             self.ephemeral = ephemeral
             self.confirm_action = confirm_action
-            self.interaction = object
-            self.message = msg
         else:
             raise NoContextOrInteractionFound("No Context or Interaction found.")
 
@@ -253,7 +246,7 @@ class NoobConfirmation(discord.ui.View):
             content="Alright not doing that then.", embed=None, view=self
         )
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+    async def interaction_check(self, interaction: discord.Interaction):
         if (
             not interaction.user
             or self.ephemeral

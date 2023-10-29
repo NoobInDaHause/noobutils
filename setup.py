@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as f:
     long_description = f.read()
 
-__version__ = "1.1.9"
+__version__ = "1.2.0"
 
 setup(
     name="noobutils",
@@ -20,6 +20,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
     ],
-    install_requires=[],
+    install_requires=["emoji"],
     python_requires=">=3.10",
 )
