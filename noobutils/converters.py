@@ -17,16 +17,21 @@ class NoobEmojiConverter(commands.EmojiConverter):
         self, ctx: commands.Context, argument
     ) -> Union[discord.Emoji, str, None]:
         try:
-            argument = int(argument)
-            return discord.utils.get(ctx.bot.emojis, id=argument)
-        except ValueError:
-            argument = argument.strip()
-            if argument in EMOJI_DATA:
-                return argument
-            custom_emoji = argument.split(":")
-            if len(custom_emoji) >= 2:
-                custom_emoji_id = custom_emoji[2].replace(">", "")
-                with contextlib.suppress(ValueError):
-                    emoji_id = int(custom_emoji_id)
-                    return discord.utils.get(ctx.bot.emojis, id=emoji_id)
-        return None
+            EMOJI_DATA[argument]
+            return argument
+        except KeyError:
+            return str(await super().convert(ctx, argument))
+        #try:
+        #    argument = int(argument)
+        #    return discord.utils.get(ctx.bot.emojis, id=argument)
+        #except ValueError:
+        #    argument = argument.strip()
+        #    if argument in EMOJI_DATA:
+        #        return argument
+        #    custom_emoji = argument.split(":")
+        #    if len(custom_emoji) >= 2:
+        #        custom_emoji_id = custom_emoji[2].replace(">", "")
+        #        with contextlib.suppress(ValueError):
+        #            emoji_id = int(custom_emoji_id)
+        #            return discord.utils.get(ctx.bot.emojis, id=emoji_id)
+        #return None
