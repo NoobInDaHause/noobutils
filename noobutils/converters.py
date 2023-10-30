@@ -12,7 +12,7 @@ class NoobCoordinate(dict):
         return key
 
 
-class NoobEmojiConverter(commands.Converter):
+class NoobEmojiConverter(commands.EmojiConverter):
     async def convert(
         self, ctx: commands.Context, argument
     ) -> Union[discord.Emoji, str, None]:
