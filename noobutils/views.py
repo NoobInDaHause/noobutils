@@ -119,7 +119,7 @@ class NoobPaginator(discord.ui.View):
         self.current_page -= 1
         await self.update_page(interaction)
 
-    @discord.ui.button(emoji="❌", style=get_button_colour("grey"))
+    @discord.ui.button(emoji="✖️", style=get_button_colour("red"))
     async def stop_page(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
@@ -159,6 +159,11 @@ class NoobPaginator(discord.ui.View):
         if self.message is not None and self.interaction is not None:
             await self.update_page(self.interaction)
         else:
+            if len(self.pages) == 1:
+                self.remove_item(self.first_page)
+                self.remove_item(self.previous_page)
+                self.remove_item(self.next_page)
+                self.remove_item(self.last_page)
             if len(self.pages) != 1:
                 self.first_page.disabled = self.current_page <= 0
                 self.previous_page.disabled = self.current_page <= 0
