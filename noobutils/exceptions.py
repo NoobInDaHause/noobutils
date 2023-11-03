@@ -12,3 +12,7 @@ class MemberOrGuildNotFound(NoobException):
 
 class NoContextOrInteractionFound(NoobException):
     pass
+
+
+class FuzzyRoleConversionFailure(NoobException):
+    pass
