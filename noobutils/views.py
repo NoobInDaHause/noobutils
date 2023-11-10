@@ -98,6 +98,9 @@ class NoobPaginator(discord.ui.View):
             self.remove_item(self.previous_page)
             self.remove_item(self.next_page)
             self.remove_item(self.last_page)
+        elif len(self.pages) == 2:
+            self.remove_item(self.first_page)
+            self.remove_item(self.last_page)
         else:
             self.first_page.disabled = self.current_page <= 0
             self.previous_page.disabled = self.current_page <= 0
@@ -164,6 +167,9 @@ class NoobPaginator(discord.ui.View):
                 self.remove_item(self.previous_page)
                 self.remove_item(self.next_page)
                 self.remove_item(self.last_page)
+            elif len(self.pages) == 2:
+                self.remove_item(self.first_page)
+                self.remove_item(self.last_page)
             if len(self.pages) != 1:
                 self.first_page.disabled = self.current_page <= 0
                 self.previous_page.disabled = self.current_page <= 0
@@ -215,7 +221,14 @@ class NoobConfirmation(discord.ui.View):
         self.message: discord.Message = None
         self.value = None
 
-    async def start(self, obj, confirm_action, ephemeral=False, *args, **kwargs):
+    async def start(
+        self,
+        obj: Union[discord.Interaction, commands.Context],
+        confirm_action,
+        ephemeral=False,
+        *args,
+        **kwargs
+    ):
         if isinstance(obj, (commands.Context, discord.Interaction)):
             if isinstance(obj, commands.Context):
                 self.context = obj
@@ -239,8 +252,8 @@ class NoobConfirmation(discord.ui.View):
         else:
             raise NoContextOrInteractionFound("No Context or Interaction found.")
 
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="Yes", style=get_button_colour("green"))
+    async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         for x in self.children:
             x.disabled = True
         self.value = True
@@ -249,8 +262,8 @@ class NoobConfirmation(discord.ui.View):
             content=self.confirm_action, embed=None, view=self
         )
 
-    @discord.ui.button(label="No", style=discord.ButtonStyle.red)
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+    @discord.ui.button(label="No", style=get_button_colour("red"))
+    async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         for x in self.children:
             x.disabled = True
         self.value = False

@@ -1,9 +1,7 @@
 import discord
 
-from redbot.core import commands
 from redbot.core.utils import chat_formatting as cf
 
-from emoji import EMOJI_DATA
 from typing import Union, List
 
 from .converters import NoobCoordinate
@@ -51,7 +49,7 @@ def get_button_colour(colour: str) -> discord.ButtonStyle:
 async def pagify_this(
     big_ass_variable_string: str,
     delim: str,
-    page_text: str,
+    page_text: str = "Page ({index}/{pages})",
     page_char: int = 2000,
     is_embed: bool = True,
     embed_title: str = None,
@@ -79,31 +77,3 @@ async def pagify_this(
             final_page.append(text)
 
     return final_page
-
-
-async def verify_emoji(
-    context: commands.Context, emoji: str
-) -> Union[discord.Emoji, str, None]:
-    try:
-        emoji = int(emoji)
-    except Exception:
-        emoji = emoji
-    if isinstance(emoji, str):
-        emoji = emoji.strip()
-        try:
-            EMOJI_DATA[emoji]
-            return emoji
-        except KeyError:
-            custom_emoji = emoji.split(":")
-            if len(custom_emoji) < 2:
-                return None
-            custom_emoji = custom_emoji[2].replace(">", "")
-            try:
-                d = int(custom_emoji)
-                return discord.utils.get(context.bot.emojis, id=d)
-            except Exception:
-                return None
-    elif isinstance(emoji, int):
-        return discord.utils.get(context.bot.emojis, id=emoji)
-    else:
-        return None
