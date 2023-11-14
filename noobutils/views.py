@@ -46,7 +46,7 @@ class NoobPaginator(discord.ui.View):
             total_pages += 1
 
         self.max_pages: int = total_pages
-        if len(self.pages) != 1:
+        if len(self.pages) >= 3:
             self.next_page.disabled = self.current_page >= self.max_pages - 1
             self.last_page.disabled = self.current_page >= self.max_pages - 1
 
@@ -93,19 +93,19 @@ class NoobPaginator(discord.ui.View):
             self.message = interaction.message
 
         kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
-        if len(self.pages) == 1:
-            self.remove_item(self.first_page)
-            self.remove_item(self.previous_page)
-            self.remove_item(self.next_page)
-            self.remove_item(self.last_page)
-        elif len(self.pages) == 2:
-            self.remove_item(self.first_page)
-            self.remove_item(self.last_page)
-        else:
+        if len(self.pages) > 2:
             self.first_page.disabled = self.current_page <= 0
             self.previous_page.disabled = self.current_page <= 0
             self.next_page.disabled = self.current_page >= self.max_pages - 1
             self.last_page.disabled = self.current_page >= self.max_pages - 1
+        elif len(self.pages) == 2:
+            self.remove_item(self.first_page)
+            self.remove_item(self.last_page)
+        elif len(self.pages) == 1:
+            self.remove_item(self.first_page)
+            self.remove_item(self.previous_page)
+            self.remove_item(self.next_page)
+            self.remove_item(self.last_page)
         await interaction.response.edit_message(**kwargs)
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
@@ -162,17 +162,17 @@ class NoobPaginator(discord.ui.View):
         if self.message is not None and self.interaction is not None:
             await self.update_page(self.interaction)
         else:
-            if len(self.pages) == 1:
+            if len(self.pages) > 2:
+                self.first_page.disabled = self.current_page <= 0
+                self.previous_page.disabled = self.current_page <= 0
+            elif len(self.pages) == 2:
+                self.remove_item(self.first_page)
+                self.remove_item(self.last_page)
+            elif len(self.pages) == 1:
                 self.remove_item(self.first_page)
                 self.remove_item(self.previous_page)
                 self.remove_item(self.next_page)
                 self.remove_item(self.last_page)
-            elif len(self.pages) == 2:
-                self.remove_item(self.first_page)
-                self.remove_item(self.last_page)
-            if len(self.pages) != 1:
-                self.first_page.disabled = self.current_page <= 0
-                self.previous_page.disabled = self.current_page <= 0
             kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
             if self.context is not None:
                 self.message = await self.context.send(**kwargs)
