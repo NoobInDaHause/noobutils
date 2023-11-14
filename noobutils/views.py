@@ -46,7 +46,7 @@ class NoobPaginator(discord.ui.View):
             total_pages += 1
 
         self.max_pages: int = total_pages
-        if len(self.pages) >= 3:
+        if len(self.pages) > 1:
             self.next_page.disabled = self.current_page >= self.max_pages - 1
             self.last_page.disabled = self.current_page >= self.max_pages - 1
 
@@ -101,6 +101,8 @@ class NoobPaginator(discord.ui.View):
         elif len(self.pages) == 2:
             self.remove_item(self.first_page)
             self.remove_item(self.last_page)
+            self.previous_page.disabled = self.current_page <= 0
+            self.next_page.disabled = self.current_page >= self.max_pages - 1
         elif len(self.pages) == 1:
             self.remove_item(self.first_page)
             self.remove_item(self.previous_page)
@@ -168,6 +170,8 @@ class NoobPaginator(discord.ui.View):
             elif len(self.pages) == 2:
                 self.remove_item(self.first_page)
                 self.remove_item(self.last_page)
+                self.previous_page.disabled = self.current_page <= 0
+                self.next_page.disabled = self.current_page >= self.max_pages - 1
             elif len(self.pages) == 1:
                 self.remove_item(self.first_page)
                 self.remove_item(self.previous_page)
