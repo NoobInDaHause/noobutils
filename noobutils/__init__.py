@@ -1,6 +1,4 @@
-from pathlib import Path
-
-__version__ = Path(Path(__file__).parent / "version.txt").read_text()
+__version__ = "1.3.8"
 
 from .converters import *
 from .exceptions import *
