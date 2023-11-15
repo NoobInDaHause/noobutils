@@ -1,7 +1,6 @@
 from pathlib import Path
 
-with open(Path(__file__).parent / "version.txt", "r") as ver:
-    __version__ = ver.read()
+__version__ = Path(Path(__file__).parent / "version.txt").read_text()
 
 from .converters import *
 from .exceptions import *

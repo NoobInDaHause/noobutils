@@ -4,8 +4,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as desc:
     long_description = desc.read()
 
-with open(Path(__file__).parent / "noobutils/version.txt", "r") as ver:
-    __version__ = ver.read()
+__version__ = Path(Path(__file__).parent / "noobutils" / "version.txt").read_text()
 
 setup(
     name="noobutils",
