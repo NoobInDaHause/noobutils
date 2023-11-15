@@ -11,6 +11,7 @@ from unidecode import unidecode
 
 from .exceptions import FuzzyRoleConversionFailure
 
+
 class NoobCoordinate(dict):
     def __convert__(self, key):
         return key
@@ -20,12 +21,11 @@ class NoobEmojiConverter(commands.EmojiConverter):
     async def convert(
         self, ctx: commands.Context, argument
     ) -> Union[discord.Emoji, str]:
-        argument = argument.strip()
-        try:
-            EMOJI_DATA[argument]
-            return argument
-        except KeyError:
-            return await super().convert(ctx, argument)
+        if argument.strip() in EMOJI_DATA.keys():
+            return argument.strip()
+        else:
+            return await super().convert(ctx, argument.strip())
+
 
 # https://github.com/phenom4n4n/phen-cogs/blob/327fc78c66814ac01f644c6b775dc4d6db6e1e5f/roleutils/converters.py#L36
 # original converter from https://github.com/TrustyJAID/Trusty-cogs/blob/master/serverstats/converters.py#L19
