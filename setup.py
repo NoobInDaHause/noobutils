@@ -1,9 +1,10 @@
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as f:
-    long_description = f.read()
+with open("README.md", "r") as desc:
+    long_description = desc.read()
 
-__version__ = "1.3.4"
+with open("version.txt", "r") as ver:
+    __version__ = ver.read()
 
 setup(
     name="noobutils",
