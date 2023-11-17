@@ -92,9 +92,12 @@ async def pagify_this(
                 timestamp=embed_timestamp,
             )
             embed.set_footer(text=formatted_page_text, icon_url=footer_icon)
-            embed.set_thumbnail(url=embed_thumbnail)
-            embed.set_image(url=embed_image)
-            embed.set_author(url=author_icon, name=author_name)
+            if embed_thumbnail:
+                embed.set_thumbnail(url=embed_thumbnail)
+            if embed_image:
+                embed.set_image(url=embed_image)
+            if author_name:
+                embed.set_author(url=author_icon, name=author_name)
             final_page.append(embed)
         else:
             final_page.append(f"{page}\n\n{formatted_page_text}")
