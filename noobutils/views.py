@@ -197,13 +197,17 @@ class NoobPaginator(discord.ui.View):
         return self.message
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if (
-            not interaction.user
-            or self.ephemeral
-            or await self.context.bot.is_owner(interaction.user)
-            or interaction.user == self.context.author
-        ):
+        if self.ephemeral:
             return True
+        if not interaction.user:
+            return True
+        if self.context:
+            return (
+                await self.context.bot.is_owner(interaction.user)
+                or interaction.user == self.context.author
+            )
+        if self.interaction:
+            return interaction.user == self.interaction.user
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
@@ -230,7 +234,7 @@ class NoobConfirmation(discord.ui.View):
         confirm_action,
         ephemeral=False,
         *args,
-        **kwargs
+        **kwargs,
     ):
         if isinstance(obj, (commands.Context, discord.Interaction)):
             if isinstance(obj, commands.Context):
@@ -256,7 +260,9 @@ class NoobConfirmation(discord.ui.View):
             raise NoContextOrInteractionFound("No Context or Interaction found.")
 
     @discord.ui.button(label="Yes", style=get_button_colour("green"))
-    async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def yes_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         for x in self.children:
             x.disabled = True
         self.value = True
@@ -266,7 +272,9 @@ class NoobConfirmation(discord.ui.View):
         )
 
     @discord.ui.button(label="No", style=get_button_colour("red"))
-    async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def no_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
         for x in self.children:
             x.disabled = True
         self.value = False
@@ -276,13 +284,17 @@ class NoobConfirmation(discord.ui.View):
         )
 
     async def interaction_check(self, interaction: discord.Interaction):
-        if (
-            not interaction.user
-            or self.ephemeral
-            or await self.context.bot.is_owner(interaction.user)
-            or interaction.user == self.context.author
-        ):
+        if self.ephemeral:
             return True
+        if not interaction.user:
+            return True
+        if self.context:
+            return (
+                await self.context.bot.is_owner(interaction.user)
+                or interaction.user == self.context.author
+            )
+        if self.interaction:
+            return interaction.user == self.interaction.user
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
