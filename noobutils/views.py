@@ -197,17 +197,18 @@ class NoobPaginator(discord.ui.View):
         return self.message
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if self.ephemeral:
+        if self.ephemeral and self.interaction:
             return True
         if not interaction.user:
             return True
         if self.context:
-            return (
-                await self.context.bot.is_owner(interaction.user)
-                or interaction.user == self.context.author
-            )
+            if await self.context.bot.is_owner(interaction.user):
+                return True
+            if self.context.author == interaction.user:
+                return True
         if self.interaction:
-            return interaction.user == self.interaction.user
+            if interaction.user == self.interaction.user:
+                return True
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
@@ -284,17 +285,18 @@ class NoobConfirmation(discord.ui.View):
         )
 
     async def interaction_check(self, interaction: discord.Interaction):
-        if self.ephemeral:
+        if self.ephemeral and self.interaction:
             return True
         if not interaction.user:
             return True
         if self.context:
-            return (
-                await self.context.bot.is_owner(interaction.user)
-                or interaction.user == self.context.author
-            )
+            if await self.context.bot.is_owner(interaction.user):
+                return True
+            if self.context.author == interaction.user:
+                return True
         if self.interaction:
-            return interaction.user == self.interaction.user
+            if interaction.user == self.interaction.user:
+                return True
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
