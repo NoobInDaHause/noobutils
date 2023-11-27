@@ -35,7 +35,8 @@ def access_denied(text_only=False) -> str:
         "Access Denied."
         if text_only
         else (
-            "[Access Denied.](https://cdn.discordapp.com/attachments/1000751975308197918/1110013262835228814/1.mp4)"
+            "[Access Denied.]"
+            "(https://cdn.discordapp.com/attachments/1000751975308197918/1110013262835228814/1.mp4)"
         )
     )
 

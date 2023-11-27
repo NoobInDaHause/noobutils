@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import discord
 
-from redbot.core import commands
+from redbot.core.bot import commands, Red
 
 from typing import Dict, Optional, Union, List, Any, TYPE_CHECKING, Union
 
@@ -197,20 +197,20 @@ class NoobPaginator(discord.ui.View):
         return self.message
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        bot: Red = interaction.client
         if self.ephemeral and self.interaction:
             return True
-        if not interaction.user:
+        elif not interaction.user:
             return True
-        if self.context:
-            if await self.context.bot.is_owner(interaction.user):
-                return True
-            if self.context.author == interaction.user:
-                return True
-        if self.interaction:
-            if interaction.user == self.interaction.user:
-                return True
-        await interaction.response.send_message(content=access_denied(), ephemeral=True)
-        return False
+        elif await bot.is_owner(interaction.user):
+            return True
+        elif self.context and (self.context.author == interaction.user):
+            return True
+        elif self.interaction and (self.interaction.user == interaction.user):
+            return True
+        else:
+            await interaction.response.send_message(content=access_denied(), ephemeral=True)
+            return False
 
     async def on_timeout(self):
         for x in self.children:
@@ -285,20 +285,20 @@ class NoobConfirmation(discord.ui.View):
         )
 
     async def interaction_check(self, interaction: discord.Interaction):
+        bot: Red = interaction.client
         if self.ephemeral and self.interaction:
             return True
-        if not interaction.user:
+        elif not interaction.user:
             return True
-        if self.context:
-            if await self.context.bot.is_owner(interaction.user):
-                return True
-            if self.context.author == interaction.user:
-                return True
-        if self.interaction:
-            if interaction.user == self.interaction.user:
-                return True
-        await interaction.response.send_message(content=access_denied(), ephemeral=True)
-        return False
+        elif await bot.is_owner(interaction.user):
+            return True
+        elif self.context and (self.context.author == interaction.user):
+            return True
+        elif self.interaction and (self.interaction.user == interaction.user):
+            return True
+        else:
+            await interaction.response.send_message(content=access_denied(), ephemeral=True)
+            return False
 
     async def on_timeout(self):
         for x in self.children:
