@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import discord
 
-from redbot.core import commands
+from redbot.core.bot import commands, Red
 
 from typing import Dict, Optional, Union, List, Any, TYPE_CHECKING, Union
 
@@ -13,6 +13,18 @@ if TYPE_CHECKING:
     from discord import Message, InteractionMessage, WebhookMessage
 
 __all__ = ("NoobPaginator", "NoobConfirmation")
+
+
+class SelectPage(discord.ui.Select):
+    def __init__(self, placeholder: str, options: List[discord.SelectOption]):
+        super().__init__(
+            placeholder=placeholder, min_values=1, max_values=1, options=options
+        )
+
+    async def callback(self, interaction: discord.Interaction[Red]) -> Any:
+        view: "NoobPaginator" = self.view
+        view.current_page = int(self.values[0])
+        await view.update_page(interaction)
 
 
 class NoobPaginator(discord.ui.View):
@@ -38,7 +50,7 @@ class NoobPaginator(discord.ui.View):
         self.ephemeral = False
 
         self.context: Optional[commands.Context] = None
-        self.interaction: Optional[discord.Interaction] = None
+        self.interaction: Optional[discord.Interaction[Red]] = None
         self.per_page: int = per_page
         self.pages: Any = pages
         total_pages, left_over = divmod(len(self.pages), self.per_page)
@@ -109,21 +121,21 @@ class NoobPaginator(discord.ui.View):
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
     async def first_page(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
         self.current_page = 0
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="◀️", style=get_button_colour("grey"))
     async def previous_page(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
         self.current_page -= 1
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="✖️", style=get_button_colour("red"))
     async def stop_page(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
         self.stop()
         if self.ephemeral:
@@ -135,20 +147,22 @@ class NoobPaginator(discord.ui.View):
 
     @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
     async def next_page(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
         self.current_page += 1
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="⏩", style=get_button_colour("grey"))
     async def last_page(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
         self.current_page = self.max_pages - 1
         await self.update_page(interaction)
 
     async def start(
-        self, obj: Union[commands.Context, discord.Interaction], ephemeral: bool = False
+        self,
+        obj: Union[commands.Context, discord.Interaction[Red]],
+        ephemeral: bool = False,
     ) -> Optional[Union[Message, InteractionMessage, WebhookMessage]]:
         self.ephemeral = ephemeral
         if isinstance(obj, commands.Context):
@@ -166,6 +180,11 @@ class NoobPaginator(discord.ui.View):
                 self.previous_page.disabled = self.current_page <= 0
                 self.next_page.disabled = self.current_page >= self.max_pages - 1
                 self.last_page.disabled = self.current_page >= self.max_pages - 1
+                select_options = [
+                    discord.SelectOption(label=f"Page {i + 1}", value=i)
+                    for i in range(len(self.pages))
+                ]
+                self.add_item(SelectPage(placeholder=f"Select Page", options=select_options[:25]))
             elif len(self.pages) == 2:
                 self.remove_item(self.first_page)
                 self.remove_item(self.last_page)
@@ -196,19 +215,17 @@ class NoobPaginator(discord.ui.View):
 
         return self.message
 
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+    async def interaction_check(self, interaction: discord.Interaction[Red]) -> bool:
         if self.ephemeral and self.interaction:
             return True
         if not interaction.user:
             return True
-        if self.context:
-            if await self.context.bot.is_owner(interaction.user):
-                return True
-            if self.context.author == interaction.user:
-                return True
-        if self.interaction:
-            if interaction.user == self.interaction.user:
-                return True
+        if await interaction.client.is_owner(interaction.user):
+            return True
+        if self.context and (self.context.author == interaction.user):
+            return True
+        if self.interaction and (self.interaction.user == interaction.user):
+            return True
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
@@ -225,7 +242,7 @@ class NoobConfirmation(discord.ui.View):
         self.ephemeral = False
         self.confirm_action: str = None
         self.context: commands.Context = None
-        self.interaction: discord.Interaction = None
+        self.interaction: discord.Interaction[Red] = None
         self.message: discord.Message = None
         self.value = None
 
@@ -262,7 +279,7 @@ class NoobConfirmation(discord.ui.View):
 
     @discord.ui.button(label="Yes", style=get_button_colour("green"))
     async def yes_button(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ):
         for x in self.children:
             x.disabled = True
@@ -274,7 +291,7 @@ class NoobConfirmation(discord.ui.View):
 
     @discord.ui.button(label="No", style=get_button_colour("red"))
     async def no_button(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ):
         for x in self.children:
             x.disabled = True
@@ -284,19 +301,17 @@ class NoobConfirmation(discord.ui.View):
             content="Alright not doing that then.", embed=None, view=self
         )
 
-    async def interaction_check(self, interaction: discord.Interaction):
+    async def interaction_check(self, interaction: discord.Interaction[Red]) -> bool:
         if self.ephemeral and self.interaction:
             return True
         if not interaction.user:
             return True
-        if self.context:
-            if await self.context.bot.is_owner(interaction.user):
-                return True
-            if self.context.author == interaction.user:
-                return True
-        if self.interaction:
-            if interaction.user == self.interaction.user:
-                return True
+        if await interaction.client.is_owner(interaction.user):
+            return True
+        if self.context and (self.context.author == interaction.user):
+            return True
+        if self.interaction and (self.interaction.user == interaction.user):
+            return True
         await interaction.response.send_message(content=access_denied(), ephemeral=True)
         return False
 
