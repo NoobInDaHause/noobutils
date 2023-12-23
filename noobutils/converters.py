@@ -1,15 +1,14 @@
 from __future__ import annotations
 
+import datetime as dt
 import discord
 
 from redbot.core import commands
 
 from emoji import EMOJI_DATA
 from rapidfuzz import process
-from typing import Union
+from typing import Collection, List, Optional, Union
 from unidecode import unidecode
-
-from .exceptions import FuzzyRoleConversionFailure
 
 
 class NoobCoordinate(dict):
@@ -18,13 +17,34 @@ class NoobCoordinate(dict):
 
 
 class NoobEmojiConverter(commands.EmojiConverter):
+    url: str
+    guild: discord.Guild
+    guild_id: int
+    animated: bool
+    created_at: dt.datetime
+    roles: List[discord.Role]
+    user: discord.User
+    name: str
+
     async def convert(
-        self, ctx: commands.Context, argument
+        self, ctx: commands.Context, argument: str
     ) -> Union[discord.Emoji, str]:
         if argument.strip() in EMOJI_DATA.keys():
             return argument.strip()
         else:
             return await super().convert(ctx, argument.strip())
+
+    async def delete(self, *, reason: Optional[str] = None) -> None:
+        pass
+
+    async def edit(
+        self,
+        *,
+        name: str = discord.utils.MISSING,
+        roles: Collection[discord.abc.Snowflake] = discord.utils.MISSING,
+        reason: Optional[str] = None,
+    ) -> discord.Emoji:
+        pass
 
 
 # https://github.com/phenom4n4n/phen-cogs/blob/327fc78c66814ac01f644c6b775dc4d6db6e1e5f/roleutils/converters.py#L36
@@ -38,6 +58,27 @@ class NoobFuzzyRole(commands.RoleConverter):
     https://github.com/Rapptz/discord.py/blob/rewrite/discord/ext/commands/converter.py#L85
     https://github.com/Cog-Creators/Red-DiscordBot/blob/V3/develop/redbot/cogs/mod/mod.py#L24
     """
+
+    color: discord.Color
+    colour: discord.Colour
+    members: List[discord.Member]
+    mention: str
+    id: int
+    hoist: bool
+    guild: discord.Guild
+    position: int
+    managed: bool
+    mentionable: bool
+    name: str
+    permissions: discord.Permissions
+    is_premium_subscriber: bool
+    is_integration: bool
+    is_assignable: bool
+    is_bot_managed: bool
+    is_default: bool
+    icon: discord.Asset
+    display_icon: Union[discord.Asset, str]
+    created_at: dt.datetime
 
     def __init__(self, response: bool = True):
         self.response = response
@@ -60,9 +101,27 @@ class NoobFuzzyRole(commands.RoleConverter):
             )
         ]
         if not result:
-            raise FuzzyRoleConversionFailure(
+            raise commands.BadArgument(
                 f'Role "{argument}" not found.' if self.response else None
             )
 
         sorted_result = sorted(result, key=lambda r: r[1], reverse=True)
         return sorted_result[0][0]
+
+    async def edit(
+        self,
+        *,
+        name: str = discord.utils.MISSING,
+        permissions: discord.Permissions = discord.utils.MISSING,
+        colour: Union[discord.Colour, int] = discord.utils.MISSING,
+        color: Union[discord.Colour, int] = discord.utils.MISSING,
+        hoist: bool = discord.utils.MISSING,
+        display_icon: Optional[Union[bytes, str]] = discord.utils.MISSING,
+        mentionable: bool = discord.utils.MISSING,
+        position: int = discord.utils.MISSING,
+        reason: Optional[str] = discord.utils.MISSING,
+    ) -> Optional[discord.Role]:
+        pass
+
+    async def delete(self, *, reason: Optional[str] = None) -> None:
+        pass

@@ -10,7 +10,7 @@ from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
 
 def is_have_avatar(
-    thing: Union[discord.Member, discord.Guild] = None, display_av=False
+    thing: Union[discord.Member, discord.User, discord.Guild] = None, display_av=False
 ) -> str:
     if thing is None:
         return ""

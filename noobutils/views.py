@@ -184,7 +184,9 @@ class NoobPaginator(discord.ui.View):
                     discord.SelectOption(label=f"Page {i + 1}", value=i)
                     for i in range(len(self.pages))
                 ]
-                self.add_item(SelectPage(placeholder=f"Select Page", options=select_options[:25]))
+                self.add_item(
+                    SelectPage(placeholder="Select Page", options=select_options[:25])
+                )
             elif len(self.pages) == 2:
                 self.remove_item(self.first_page)
                 self.remove_item(self.last_page)
