@@ -82,7 +82,7 @@ class NoobFuzzyRole(commands.RoleConverter):
     @classmethod
     async def convert(cls, ctx: commands.Context, argument: str) -> discord.Role:
         with contextlib.suppress(commands.BadArgument):
-            basic_role = await super().convert(None, ctx, argument)
+            basic_role = await super().convert(commands.RoleConverter(), ctx, argument)
             return cls(role=basic_role)
         result = [
             (r[2], r[1])
