@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import discord
 
 from redbot.core.bot import commands, Red
@@ -234,8 +235,11 @@ class NoobPaginator(discord.ui.View):
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
-        await self.message.edit(view=self)
         self.stop()
+        with contextlib.suppress(
+            discord.errors.Forbidden, discord.errors.HTTPException
+        ):
+            await self.message.edit(view=self)
 
 
 class NoobConfirmation(discord.ui.View):
@@ -321,6 +325,9 @@ class NoobConfirmation(discord.ui.View):
         for x in self.children:
             x.disabled = True
         self.stop()
-        await self.message.edit(
-            content="You took too long to respond.", embed=None, view=self
-        )
+        with contextlib.suppress(
+            discord.errors.Forbidden, discord.errors.HTTPException
+        ):
+            await self.message.edit(
+                content="You took too long to respond.", embed=None, view=self
+            )

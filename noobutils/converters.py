@@ -59,38 +59,32 @@ class NoobFuzzyRole(commands.RoleConverter):
     https://github.com/Cog-Creators/Red-DiscordBot/blob/V3/develop/redbot/cogs/mod/mod.py#L24
     """
 
-    color: discord.Color
-    colour: discord.Colour
-    members: List[discord.Member]
-    mention: str
-    id: int
-    hoist: bool
-    guild: discord.Guild
-    position: int
-    managed: bool
-    mentionable: bool
-    name: str
-    permissions: discord.Permissions
-    is_premium_subscriber: bool
-    is_integration: bool
-    is_assignable: bool
-    is_bot_managed: bool
-    is_default: bool
-    icon: discord.Asset
-    display_icon: Union[discord.Asset, str]
-    created_at: dt.datetime
-
-    def __init__(self, response: bool = True):
-        self.response = response
+    def __init__(self, role: discord.Role):
         super().__init__()
+        self._role = role
+        self.color: discord.Color = role.color
+        self.colour: discord.Colour = role.colour
+        self.members: List[discord.Member] = role.members
+        self.mention: str = role.mention
+        self.id: int = role.id
+        self.hoist: bool = role.hoist
+        self.guild: discord.Guild = role.guild
+        self.position: int = role.position
+        self.managed: bool = role.managed
+        self.mentionable: bool = role.mentionable
+        self.name: str = role.name
+        self.permissions: discord.Permissions = role.permissions
+        self.icon: discord.Asset = role.icon
+        self.display_icon: Union[discord.Asset, str] = role.display_icon
+        self.created_at: dt.datetime = role.created_at
 
-    async def convert(self, ctx: commands.Context, argument: str) -> discord.Role:
+    @classmethod
+    async def convert(cls, ctx: commands.Context, argument: str) -> discord.Role:
         try:
             basic_role = await super().convert(ctx, argument)
+            return cls(role=basic_role)
         except commands.BadArgument:
             pass
-        else:
-            return basic_role
         result = [
             (r[2], r[1])
             for r in process.extract(
@@ -101,12 +95,25 @@ class NoobFuzzyRole(commands.RoleConverter):
             )
         ]
         if not result:
-            raise commands.BadArgument(
-                f'Role "{argument}" not found.' if self.response else None
-            )
+            raise commands.BadArgument(f'Role "{argument}" not found.')
 
         sorted_result = sorted(result, key=lambda r: r[1], reverse=True)
-        return sorted_result[0][0]
+        return cls(role=sorted_result[0][0])
+
+    def is_premium_subscriber(self) -> bool:
+        return self._role.is_premium_subscriber()
+
+    def is_integration(self) -> bool:
+        return self._role.is_integration()
+
+    def is_assignable(self) -> bool:
+        return self._role.is_assignable()
+
+    def is_bot_managed(self) -> bool:
+        return self._role.is_bot_managed()
+
+    def is_default(self) -> bool:
+        return self._role.is_default()
 
     async def edit(
         self,
@@ -121,7 +128,17 @@ class NoobFuzzyRole(commands.RoleConverter):
         position: int = discord.utils.MISSING,
         reason: Optional[str] = discord.utils.MISSING,
     ) -> Optional[discord.Role]:
-        pass
+        return await self._role.edit(
+            name=name,
+            permissions=permissions,
+            colour=colour,
+            color=color,
+            hoist=hoist,
+            display_icon=display_icon,
+            mentionable=mentionable,
+            position=position,
+            reason=reason,
+        )
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
-        pass
+        return await self._role.delete(reason=reason)
