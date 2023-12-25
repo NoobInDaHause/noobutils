@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import discord
 
@@ -80,11 +81,9 @@ class NoobFuzzyRole(commands.RoleConverter):
 
     @classmethod
     async def convert(cls, ctx: commands.Context, argument: str) -> discord.Role:
-        try:
-            basic_role = await super().convert(ctx, argument)
+        with contextlib.suppress(commands.BadArgument):
+            basic_role = await super().convert(None, ctx, argument)
             return cls(role=basic_role)
-        except commands.BadArgument:
-            pass
         result = [
             (r[2], r[1])
             for r in process.extract(
