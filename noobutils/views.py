@@ -237,7 +237,7 @@ class NoobPaginator(discord.ui.View):
             x.disabled = True
         self.stop()
         with contextlib.suppress(
-            discord.errors.Forbidden, discord.errors.HTTPException
+            Exception
         ):
             await self.message.edit(view=self)
 
@@ -326,7 +326,7 @@ class NoobConfirmation(discord.ui.View):
             x.disabled = True
         self.stop()
         with contextlib.suppress(
-            discord.errors.Forbidden, discord.errors.HTTPException
+            Exception
         ):
             await self.message.edit(
                 content="You took too long to respond.", embed=None, view=self
