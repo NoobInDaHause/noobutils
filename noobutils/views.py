@@ -235,11 +235,11 @@ class NoobPaginator(discord.ui.View):
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
-        self.stop()
         with contextlib.suppress(
             Exception
         ):
             await self.message.edit(view=self)
+        self.stop()
 
 
 class NoobConfirmation(discord.ui.View):
@@ -324,10 +324,10 @@ class NoobConfirmation(discord.ui.View):
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
-        self.stop()
         with contextlib.suppress(
             Exception
         ):
             await self.message.edit(
                 content="You took too long to respond.", embed=None, view=self
             )
+        self.stop()
