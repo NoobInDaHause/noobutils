@@ -8,7 +8,7 @@ from redbot.core import commands
 
 from emoji import EMOJI_DATA
 from rapidfuzz import process
-from typing import Collection, List, Optional, Union
+from typing import Collection, List, Optional, Self, Union
 from unidecode import unidecode
 
 
@@ -80,7 +80,7 @@ class NoobFuzzyRole(commands.RoleConverter):
         self.created_at: dt.datetime = role.created_at
 
     @classmethod
-    async def convert(cls, ctx: commands.Context, argument: str) -> discord.Role:
+    async def convert(cls, ctx: commands.Context, argument: str) -> Self:
         with contextlib.suppress(commands.BadArgument):
             basic_role = await commands.RoleConverter().convert(ctx, argument)
             return cls(role=basic_role)
