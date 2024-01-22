@@ -10,11 +10,14 @@ from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
 
 def is_have_avatar(
-    thing: Union[discord.Member, discord.User, discord.Guild] = None, display_av=False
+    thing: Union[
+        discord.Member, discord.User, discord.Guild, discord.ClientUser
+    ] = None,
+    display_av=False,
 ) -> str:
     if thing is None:
         return ""
-    elif isinstance(thing, discord.Member):
+    elif isinstance(thing, (discord.Member, discord.ClientUser, discord.User)):
         return (
             thing.display_avatar.url
             if display_av
@@ -61,7 +64,7 @@ def get_button_colour(colour: str) -> discord.ButtonStyle:
 
 async def pagify_this(
     big_ass_variable_string: str,
-    delim: str,
+    delim: str = "\n",
     page_text: str = "Page ({index}/{pages})",
     page_char: int = 2000,
     is_embed: bool = True,

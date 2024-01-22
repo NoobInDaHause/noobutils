@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as desc:
     long_description = desc.read()
 
-__version__ = "1.7.8"
+__version__ = "1.7.9"
 
 setup(
     name="noobutils",
