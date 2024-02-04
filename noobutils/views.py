@@ -204,7 +204,7 @@ class NoobPaginator(discord.ui.View):
             elif self.interaction is not None:
                 if self.interaction.response.is_done():
                     self.message = await self.interaction.followup.send(
-                        **kwargs, view=self
+                        **kwargs, ephemeral=ephemeral
                     )
                 else:
                     await self.interaction.response.send_message(
