@@ -13,8 +13,8 @@ from unidecode import unidecode
 
 
 class NoobCoordinate(dict):
-    def __convert__(self, key):
-        return key
+  def __missing__(self, key: str):
+    return "{" + key + "}"
 
 
 class NoobEmojiConverter(commands.EmojiConverter):
