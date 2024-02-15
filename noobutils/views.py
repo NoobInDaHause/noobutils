@@ -48,13 +48,19 @@ class SelectPageButton(discord.ui.Button):
             return
         try:
             p = int(modal.page.value)
+            current = p - 1
         except ValueError:
             return await interaction.followup.send(
                 content=f"Invalid page provided. Must be a number between 1-{self.max_page}.",
                 ephemeral=True
             )
+        if current > self.max_page:
+            return await interaction.followup.send(
+                content=f"Invalid page provided. Must be a number between 1-{self.max_page}.",
+                ephemeral=True
+            )
         view: "NoobPaginator" = self.view
-        view.current_page = p - 1
+        view.current_page = current
         await view.update_page(interaction)
 
 class SelectPageMenu(discord.ui.Select):
@@ -149,7 +155,10 @@ class NoobPaginator(discord.ui.View):
 
         kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
         self.disable_items(len(self.pages))
-        await interaction.response.edit_message(**kwargs)
+        if interaction.response.is_done():
+            await self.message.edit(**kwargs)
+        else:
+            await interaction.response.edit_message(**kwargs)
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
     async def first_page(
