@@ -18,12 +18,10 @@ __all__ = ("NoobPaginator", "NoobConfirmation")
 
 
 class PageModal(discord.ui.Modal):
-    def __init__(self, label_pages: str, max_page: int, timeout: float = 30.0) -> None:
+    def __init__(self, timeout: float = 30.0) -> None:
         super().__init__(title="Go To Page.", timeout=timeout)
-        self.page.label = label_pages
-        self.max_page = max_page
 
-    page = discord.ui.TextInput(min_length=1)
+    page = discord.ui.TextInput(min_length=1, label="Input a number.")
 
     async def on_submit(self, interaction: discord.Interaction[Red]):
         await interaction.response.defer()
@@ -35,16 +33,15 @@ class PageModal(discord.ui.Modal):
         )
 
 class SelectPageButton(discord.ui.Button):
-    def __init__(self, label_pages: str, max_page: int):
+    def __init__(self, max_page: int):
         super().__init__(
             style=get_button_colour("grey"),
             label="Go To Page"
         )
-        self.label_pages = label_pages
         self.max_page = max_page
 
     async def callback(self, interaction: discord.Interaction[Red]) -> Any:
-        modal = PageModal(self.label_pages, self.max_page)
+        modal = PageModal()
         await interaction.response.send_modal(modal)
         await modal.wait()
         if not modal.page.value:
@@ -53,10 +50,11 @@ class SelectPageButton(discord.ui.Button):
             p = int(modal.page.value)
         except ValueError:
             return await interaction.followup.send(
-                content=f"Invalid page provided. Must be between 1-{self.max_page}.", ephemeral=True
+                content=f"Invalid page provided. Must be a number between 1-{self.max_page}.",
+                ephemeral=True
             )
         view: "NoobPaginator" = self.view
-        view.current_page = p
+        view.current_page = p - 1
         await view.update_page(interaction)
 
 class SelectPageMenu(discord.ui.Select):
@@ -150,21 +148,7 @@ class NoobPaginator(discord.ui.View):
             self.message = interaction.message
 
         kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
-        if len(self.pages) >= 3:
-            self.first_page.disabled = self.current_page <= 0
-            self.previous_page.disabled = self.current_page <= 0
-            self.next_page.disabled = self.current_page >= self.max_pages - 1
-            self.last_page.disabled = self.current_page >= self.max_pages - 1
-        elif len(self.pages) == 2:
-            self.remove_item(self.first_page)
-            self.remove_item(self.last_page)
-            self.previous_page.disabled = self.current_page <= 0
-            self.next_page.disabled = self.current_page >= self.max_pages - 1
-        elif len(self.pages) == 1:
-            self.remove_item(self.first_page)
-            self.remove_item(self.previous_page)
-            self.remove_item(self.next_page)
-            self.remove_item(self.last_page)
+        self.disable_items(len(self.pages))
         await interaction.response.edit_message(**kwargs)
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
@@ -231,7 +215,6 @@ class NoobPaginator(discord.ui.View):
         ephemeral: bool = False,
     ) -> Optional[Union[Message, InteractionMessage, WebhookMessage]]:
         self.ephemeral = ephemeral
-        maximum = self.max_pages - 1
         if isinstance(obj, commands.Context):
             self.context = obj
             self.interaction = None
@@ -245,7 +228,7 @@ class NoobPaginator(discord.ui.View):
             self.disable_items(len(self.pages))
             if len(self.pages) >= 3:
                 if self.use_page_button:
-                    self.add_item(SelectPageButton(f"1-{maximum}", maximum))
+                    self.add_item(SelectPageButton(self.max_pages - 1))
                 if self.use_select_menu:
                     select_options = [
                         discord.SelectOption(label=f"Page {i + 1}", value=i)
