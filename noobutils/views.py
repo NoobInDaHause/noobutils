@@ -4,6 +4,7 @@ import contextlib
 import discord
 
 from redbot.core.bot import commands, Red
+from redbot.core.utils import chat_formatting as cf
 
 from typing import Dict, Optional, Union, List, Any, TYPE_CHECKING, Union
 
@@ -16,7 +17,49 @@ if TYPE_CHECKING:
 __all__ = ("NoobPaginator", "NoobConfirmation")
 
 
-class SelectPage(discord.ui.Select):
+class PageModal(discord.ui.Modal):
+    def __init__(self, label_pages: str, max_page: int, timeout: float = 30.0) -> None:
+        super().__init__(title="Go To Page.", timeout=timeout)
+        self.page.label = label_pages
+        self.max_page = max_page
+
+    page = discord.ui.TextInput(min_length=1)
+
+    async def on_submit(self, interaction: discord.Interaction[Red]):
+        await interaction.response.defer()
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        await interaction.response.send_message(
+            content=f"Something went wrong. Please report this to the bot owner.\n{cf.box(str(error))}",
+            ephemeral=True,
+        )
+
+class SelectPageButton(discord.ui.Button):
+    def __init__(self, label_pages: str, max_page: int):
+        super().__init__(
+            style=get_button_colour("grey"),
+            label="Go To Page"
+        )
+        self.label_pages = label_pages
+        self.max_page = max_page
+
+    async def callback(self, interaction: discord.Interaction[Red]) -> Any:
+        modal = PageModal(self.label_pages, self.max_page)
+        await interaction.response.send_modal(modal)
+        await modal.wait()
+        if not modal.page.value:
+            return
+        try:
+            p = int(modal.page.value)
+        except ValueError:
+            return await interaction.followup.send(
+                content=f"Invalid page provided. Must be between 1-{self.max_page}.", ephemeral=True
+            )
+        view: "NoobPaginator" = self.view
+        view.current_page = p
+        await view.update_page(interaction)
+
+class SelectPageMenu(discord.ui.Select):
     def __init__(self, placeholder: str, options: List[discord.SelectOption]):
         super().__init__(
             placeholder=placeholder, min_values=1, max_values=1, options=options
@@ -43,6 +86,8 @@ class NoobPaginator(discord.ui.View):
         *,
         timeout: Optional[float] = 180.0,
         delete_message_after: bool = False,
+        use_select_menu: bool = False,
+        use_page_button: bool = True,
         per_page: int = 1,
     ):
         super().__init__(timeout=timeout)
@@ -59,6 +104,8 @@ class NoobPaginator(discord.ui.View):
             total_pages += 1
 
         self.max_pages: int = total_pages
+        self.use_select_menu = use_select_menu
+        self.use_page_button = use_page_button
 
     def stop(self) -> None:
         self.message = None
@@ -160,12 +207,31 @@ class NoobPaginator(discord.ui.View):
         self.current_page = self.max_pages - 1
         await self.update_page(interaction)
 
+    def disable_items(self, index: int):
+        maximum = self.max_pages - 1
+        if index == 1:
+            self.remove_item(self.first_page)
+            self.remove_item(self.previous_page)
+            self.remove_item(self.next_page)
+            self.remove_item(self.last_page)
+        elif index == 2:
+            self.remove_item(self.first_page)
+            self.remove_item(self.last_page)
+            self.previous_page.disabled = self.current_page <= 0
+            self.next_page.disabled = self.current_page >= maximum
+        elif index >= 3:
+            self.first_page.disabled = self.current_page <= 0
+            self.previous_page.disabled = self.current_page <= 0
+            self.next_page.disabled = self.current_page >= maximum
+            self.last_page.disabled = self.current_page >= maximum
+
     async def start(
         self,
         obj: Union[commands.Context, discord.Interaction[Red]],
         ephemeral: bool = False,
     ) -> Optional[Union[Message, InteractionMessage, WebhookMessage]]:
         self.ephemeral = ephemeral
+        maximum = self.max_pages - 1
         if isinstance(obj, commands.Context):
             self.context = obj
             self.interaction = None
@@ -176,28 +242,18 @@ class NoobPaginator(discord.ui.View):
         if self.message is not None and self.interaction is not None:
             await self.update_page(self.interaction)
         else:
+            self.disable_items(len(self.pages))
             if len(self.pages) >= 3:
-                self.first_page.disabled = self.current_page <= 0
-                self.previous_page.disabled = self.current_page <= 0
-                self.next_page.disabled = self.current_page >= self.max_pages - 1
-                self.last_page.disabled = self.current_page >= self.max_pages - 1
-                select_options = [
-                    discord.SelectOption(label=f"Page {i + 1}", value=i)
-                    for i in range(len(self.pages))
-                ]
-                self.add_item(
-                    SelectPage(placeholder="Select Page", options=select_options[:25])
-                )
-            elif len(self.pages) == 2:
-                self.remove_item(self.first_page)
-                self.remove_item(self.last_page)
-                self.previous_page.disabled = self.current_page <= 0
-                self.next_page.disabled = self.current_page >= self.max_pages - 1
-            elif len(self.pages) == 1:
-                self.remove_item(self.first_page)
-                self.remove_item(self.previous_page)
-                self.remove_item(self.next_page)
-                self.remove_item(self.last_page)
+                if self.use_page_button:
+                    self.add_item(SelectPageButton(f"1-{maximum}", maximum))
+                if self.use_select_menu:
+                    select_options = [
+                        discord.SelectOption(label=f"Page {i + 1}", value=i)
+                        for i in range(len(self.pages))
+                    ]
+                    self.add_item(
+                        SelectPageMenu(placeholder="Select Page", options=select_options[:25])
+                    )
             kwargs = await self.get_page_kwargs(self.get_page(self.current_page))
             if self.context is not None:
                 self.message = await self.context.send(**kwargs)
