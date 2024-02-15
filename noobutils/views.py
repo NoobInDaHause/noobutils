@@ -51,12 +51,12 @@ class SelectPageButton(discord.ui.Button):
             current = p - 1
         except ValueError:
             return await interaction.followup.send(
-                content=f"Invalid page provided. Must be a number between 1-{self.max_page}.",
+                content=f"Invalid page provided. Must be a number between 1-{self.max_page + 1}.",
                 ephemeral=True
             )
         if current > self.max_page:
             return await interaction.followup.send(
-                content=f"Invalid page provided. Must be a number between 1-{self.max_page}.",
+                content=f"Invalid page provided. Must be a number between 1-{self.max_page + 1}.",
                 ephemeral=True
             )
         view: "NoobPaginator" = self.view
