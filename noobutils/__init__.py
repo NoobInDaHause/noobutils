@@ -1,5 +1,6 @@
-__version__ = "1.9.0"
+__version__ = "1.10.0"
 
+from .cog import *
 from .converters import *
 from .exceptions import *
 from .views import *
