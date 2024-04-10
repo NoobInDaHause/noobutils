@@ -5,6 +5,8 @@ from redbot.core.utils import chat_formatting as cf
 
 from typing import List
 
+from . import __version__ as __nu_version__
+
 
 class Cog(commands.Cog):
     def __init__(
@@ -42,7 +44,8 @@ class Cog(commands.Cog):
             f"{super().format_help_for_context(context)}\n\n"
             f"Cog Version: **{self.__version__}**\n"
             f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in self.__author__])}\n"
-            f"Cog Documentation: [[Click here]]({self.__docs__})"
+            f"Cog Documentation: [[Click here]]({self.__docs__})\n"
+            f"Utils Version: **{__nu_version__}**"
         )
 
 
@@ -82,5 +85,6 @@ class GroupCog(commands.GroupCog):
             f"{super().format_help_for_context(context)}\n\n"
             f"Cog Version: **{self.__version__}**\n"
             f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in self.__author__])}\n"
-            f"Cog Documentation: [[Click here]]({self.__docs__})"
+            f"Cog Documentation: [[Click here]]({self.__docs__})\n"
+            f"Utils Version: **{__nu_version__}**"
         )
