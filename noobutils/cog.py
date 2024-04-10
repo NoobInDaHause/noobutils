@@ -15,7 +15,7 @@ class Cog(commands.Cog):
         authors: List[str],
         use_config: bool = False,
         identifier: int = 1234567890,
-        force_registration: bool = True,
+        force_registration: bool = False,
         *args,
         **kwargs,
     ):
@@ -55,7 +55,7 @@ class GroupCog(commands.GroupCog):
         authors: List[str],
         use_config: bool = False,
         identifier: int = 1234567890,
-        force_registration: bool = True,
+        force_registration: bool = False,
         *args,
         **kwargs,
     ):
