@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as desc:
     long_description = desc.read()
 
-raw_version = {"major": 1, "minor": 11, "patch": 6}
+raw_version = {"major": 1, "minor": 11, "patch": 7}
 
 __version__ = (
     f"{raw_version.get('major')}.{raw_version.get('minor')}.{raw_version.get('patch')}"
@@ -21,7 +21,7 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Operating System :: OS Independent",
     ],
     install_requires=["emoji", "rapidfuzz", "unidecode"],
