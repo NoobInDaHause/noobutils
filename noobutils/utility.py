@@ -80,8 +80,8 @@ async def pagify_this(
     author_icon: str = None,
     author_name: str = None,
 ) -> List[Union[discord.Embed, str]]:
-    if delim is None:
-        delim = ["\n"]
+    if delims is None:
+        delims = ["\n"]
     final_page = []
     page_length = page_char if is_embed else (page_char - 50)
     pages = list(
