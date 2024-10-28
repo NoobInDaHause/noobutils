@@ -116,9 +116,9 @@ async def pagify_this(
 def version_check(needed_version: str):
     v = needed_version.split(".")
     if (
-        int(v[0]) < raw_version["major"]
-        or int(v[1]) < raw_version["minor"]
-        or int(v[2]) < raw_version["patch"]
+        int(v[0]) > raw_version["major"]
+        or int(v[1]) > raw_version["minor"]
+        or int(v[2]) > raw_version["patch"]
     ):
         raise CogLoadError(
             "This cog requires a newer version of noobutils.\n"
