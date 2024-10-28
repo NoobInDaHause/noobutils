@@ -1,4 +1,8 @@
-__version__ = "1.10.2"
+raw_version = {"major": 1, "minor": 11, "patch": 0}
+
+__version__ = (
+    f"{raw_version.get('major')}.{raw_version.get('minor')}.{raw_version.get('patch')}"
+)
 
 from .cog import *
 from .converters import *

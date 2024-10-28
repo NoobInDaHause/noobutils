@@ -17,7 +17,7 @@ class NoobCoordinate(dict):
         return "{" + key + "}"
 
 
-class NoobEmojiConverter(app_commands.Transformer):
+class NoobEmojiConverter(commands.Converter, app_commands.Transformer):
     url: str
     guild: discord.Guild
     guild_id: int
@@ -27,21 +27,19 @@ class NoobEmojiConverter(app_commands.Transformer):
     user: discord.User
     name: str
 
-    @classmethod
     async def convert(
-        cls, ctx: commands.Context, argument: str
+        self, ctx: commands.Context, argument: str
     ) -> Union[discord.Emoji, str]:
         if argument.strip() in EMOJI_DATA.keys():
             return argument.strip()
         else:
             return await commands.EmojiConverter().convert(ctx, argument.strip())
 
-    @classmethod
     async def transform(
-        cls, interaction: discord.Interaction[Red], value: str
+        self, interaction: discord.Interaction[Red], value: str
     ) -> Union[discord.Emoji, str]:
         ctx = await interaction.client.get_context(interaction)
-        return await cls.convert(ctx, value)
+        return await self.convert(ctx, value)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         raise NotImplementedError("This is only used for type hinting.")
@@ -58,7 +56,7 @@ class NoobEmojiConverter(app_commands.Transformer):
 
 # https://github.com/phenom4n4n/phen-cogs/blob/327fc78c66814ac01f644c6b775dc4d6db6e1e5f/roleutils/converters.py#L36
 # original converter from https://github.com/TrustyJAID/Trusty-cogs/blob/master/serverstats/converters.py#L19
-class NoobFuzzyRole(app_commands.Transformer):
+class NoobFuzzyRole(commands.COnverter, app_commands.Transformer):
     """
     This will accept role ID's, mentions, and perform a fuzzy search for
     roles within the guild and return a list of role objects
@@ -84,8 +82,7 @@ class NoobFuzzyRole(app_commands.Transformer):
     display_icon: Union[discord.Asset, str]
     created_at: dt.datetime
 
-    @classmethod
-    async def convert(cls, ctx: commands.Context, argument: str) -> discord.Role:
+    async def convert(self, ctx: commands.Context, argument: str) -> discord.Role:
         with contextlib.suppress(commands.BadArgument):
             return await commands.RoleConverter().convert(ctx, argument)
         result = [
@@ -103,12 +100,11 @@ class NoobFuzzyRole(app_commands.Transformer):
         sorted_result = sorted(result, key=lambda r: r[1], reverse=True)
         return sorted_result[0][0]
 
-    @classmethod
     async def transform(
-        cls, interaction: discord.Interaction[Red], value: str
+        self, interaction: discord.Interaction[Red], value: str
     ) -> discord.Role:
         ctx = await interaction.client.get_context(interaction)
-        return await cls.convert(ctx, value)
+        return await self.convert(ctx, value)
 
     def is_premium_subscriber(self) -> bool:
         raise NotImplementedError("This is only used for type hinting.")

@@ -1,10 +1,12 @@
 import discord
 
+from redbot.core.errors import CogLoadError
 from redbot.core.utils import chat_formatting as cf
 
 from datetime import datetime
 from typing import Union, List
 
+from . import raw_version, __version__ as __nu_version__
 from .converters import NoobCoordinate
 from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
@@ -21,11 +23,11 @@ def is_have_avatar(
         return (
             thing.display_avatar.url
             if display_av
-            else thing.avatar.url
-            if thing.avatar
-            else thing.display_avatar.url
-            if thing.display_avatar
-            else ""
+            else (
+                thing.avatar.url
+                if thing.avatar
+                else thing.display_avatar.url if thing.display_avatar else ""
+            )
         )
     elif isinstance(thing, discord.Guild):
         return thing.icon.url if thing.icon else ""
@@ -38,7 +40,8 @@ def access_denied(text_only=False) -> str:
         "Access Denied."
         if text_only
         else (
-            "[Access Denied.](https://cdn.discordapp.com/attachments/1000751975308197918/1110013262835228814/1.mp4)"
+            "[Access Denied.](https://cdn.discordapp.com/attachments/1000751975308197918/"
+            "1110013262835228814/1.mp4)"
         )
     )
 
@@ -64,7 +67,7 @@ def get_button_colour(colour: str) -> discord.ButtonStyle:
 
 async def pagify_this(
     big_ass_variable_string: str,
-    delim: str = "\n",
+    delims: List[str] = None,
     page_text: str = "Page ({index}/{pages})",
     page_char: int = 2000,
     is_embed: bool = True,
@@ -77,10 +80,12 @@ async def pagify_this(
     author_icon: str = None,
     author_name: str = None,
 ) -> List[Union[discord.Embed, str]]:
+    if delim is None:
+        delim = ["\n"]
     final_page = []
     page_length = page_char if is_embed else (page_char - 50)
     pages = list(
-        cf.pagify(big_ass_variable_string, delims=[delim], page_length=page_length)
+        cf.pagify(big_ass_variable_string, delims=delims, page_length=page_length)
     )
 
     for index, page in enumerate(pages, 1):
@@ -106,3 +111,22 @@ async def pagify_this(
             final_page.append(f"{page}\n\n{formatted_page_text}")
 
     return final_page
+
+
+def version_check(needed_version: str):
+    v = needed_version.split(".")
+    if (
+        int(v[0]) < raw_version["major"]
+        or int(v[1]) < raw_version["minor"]
+        or int(v[2]) < raw_version["patch"]
+    ):
+        raise CogLoadError(
+            "This cog requires a newer version of noobutils.\n"
+            f"Your system currently has noobutils version: {__nu_version__}\n"
+            f"The cog requires noobutils version: {needed_version} or newer\n"
+            "Please run the command `[p]pipinstall --force-reinstall --no-cache-dir "
+            "git+https://github.com/NoobInDaHause/noobutils.git` then restart your bot and then load the cog."
+            "\nIf problem still continues please report it to the cog author via [GitHub]"
+            "(https://github.com/NoobInDaHause/noobutils) or join the discord server [here](https://"
+            "discord.gg/Hs2H9sQejw)."
+        )

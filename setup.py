@@ -3,7 +3,11 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as desc:
     long_description = desc.read()
 
-__version__ = "1.10.2"
+raw_version = {"major": 1, "minor": 11, "patch": 0}
+
+__version__ = (
+    f"{raw_version.get('major')}.{raw_version.get('minor')}.{raw_version.get('patch')}"
+)
 
 setup(
     name="noobutils",
@@ -20,10 +24,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        "emoji",
-        "rapidfuzz",
-        "unidecode"
-    ],
-    python_requires=">=3.10",
+    install_requires=["emoji", "rapidfuzz", "unidecode"],
+    python_requires=">=3.11",
 )
