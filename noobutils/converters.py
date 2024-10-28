@@ -56,7 +56,7 @@ class NoobEmojiConverter(commands.Converter, app_commands.Transformer):
 
 # https://github.com/phenom4n4n/phen-cogs/blob/327fc78c66814ac01f644c6b775dc4d6db6e1e5f/roleutils/converters.py#L36
 # original converter from https://github.com/TrustyJAID/Trusty-cogs/blob/master/serverstats/converters.py#L19
-class NoobFuzzyRole(commands.COnverter, app_commands.Transformer):
+class NoobFuzzyRole(commands.Converter, app_commands.Transformer):
     """
     This will accept role ID's, mentions, and perform a fuzzy search for
     roles within the guild and return a list of role objects
