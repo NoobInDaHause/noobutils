@@ -1,4 +1,4 @@
-raw_version = {"major": 1, "minor": 11, "patch": 4}
+raw_version = {"major": 1, "minor": 11, "patch": 5}
 
 __version__ = (
     f"{raw_version.get('major')}.{raw_version.get('minor')}.{raw_version.get('patch')}"

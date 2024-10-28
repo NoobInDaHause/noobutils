@@ -122,8 +122,8 @@ def version_check(needed_version: str):
     ):
         raise CogLoadError(
             "This cog requires a newer version of noobutils.\n"
-            f"Your system currently has noobutils version: {__nu_version__}\n"
-            f"The cog requires noobutils version: {needed_version} or newer\n"
+            f"Your system currently has noobutils version: **{__nu_version__}**\n"
+            f"The cog requires noobutils version: **{needed_version}** or newer\n"
             "Please run the command `[p]pipinstall --force-reinstall --no-cache-dir "
             "git+https://github.com/NoobInDaHause/noobutils.git` then restart your bot and then load the cog."
             "\nIf problem still continues please report it to the cog author via [GitHub]"

@@ -216,7 +216,7 @@ class NoobPaginator(NoobView):
                         placeholder="Select Page", options=select_options[:25]
                     )
                 )
-        kwargs = await self.get_page_kwargs(self.current_page)
+        kwargs = self.get_page_kwargs(self.current_page)
 
         if self.context is not None:
             self.message = await self.context.send(**kwargs)
@@ -236,7 +236,7 @@ class NoobPaginator(NoobView):
             )
 
     async def update_page(self, interaction: discord.Interaction[Red]) -> None:
-        kwargs = await self.get_page_kwargs(self.current_page)
+        kwargs = self.get_page_kwargs(self.current_page)
         self.disable_items(len(self.pages))
         if interaction.response.is_done():
             await interaction.message.edit(**kwargs)
