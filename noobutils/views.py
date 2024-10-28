@@ -307,6 +307,8 @@ class NoobConfirmation(NoobView):
         self.confirm_action = confirm_action
 
     async def start(self, **kwargs) -> Any:
+        kwargs["view"] = self
+
         if self.context:
             self.interaction = None
             self.message = await self.context.send(**kwargs)
