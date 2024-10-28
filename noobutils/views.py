@@ -109,7 +109,7 @@ class SelectPageButton(discord.ui.Button):
                 content=f"Invalid page provided. Must be a number between 1-{self.max_page + 1}.",
                 ephemeral=True,
             )
-        if current > self.max_page or current < 1:
+        if current > self.max_page or current < 0:
             return await interaction.followup.send(
                 content=f"Invalid page provided. Must be a number between 1-{self.max_page + 1}.",
                 ephemeral=True,
