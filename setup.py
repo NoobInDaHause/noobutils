@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as desc:
     long_description = desc.read()
 
-raw_version = {"major": 1, "minor": 11, "patch": 5}
+raw_version = {"major": 1, "minor": 11, "patch": 6}
 
 __version__ = (
     f"{raw_version.get('major')}.{raw_version.get('minor')}.{raw_version.get('patch')}"

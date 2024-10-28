@@ -64,9 +64,10 @@ class NoobView(discord.ui.View):
         for x in self.children:
             x.disabled = True
         with contextlib.suppress(discord.errors.HTTPException):
+            await self.message.edit()
             await self.message.edit(
-                content=self.timeout_message or ...,
-                embed=None if self.remove_embed_on_timeout else ...,
+                content=self.timeout_message or discord.utils.MISSING,
+                embed=None if self.remove_embed_on_timeout else discord.utils.MISSING,
                 view=self,
             )
 
