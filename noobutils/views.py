@@ -262,14 +262,14 @@ class NoobPaginator(NoobView):
     async def stop_page(
         self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
-        await interaction.response.defer()
-        self.stop()
         if self.ephemeral:
             for x in self.children:
                 x.disabled = True
-            await interaction.message.edit(view=self)
+            await interaction.response.edit_message(view=self)
         else:
+            await interaction.response.defer()
             await interaction.message.delete()
+        self.stop()
 
     @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
     async def next_page(
