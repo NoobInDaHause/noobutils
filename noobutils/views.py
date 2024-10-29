@@ -309,6 +309,7 @@ class NoobConfirmation(NoobView):
 
     async def start(self, **kwargs) -> Any:
         kwargs["view"] = self
+        kwargs.pop("ephemeral", None)
 
         if self.context:
             self.interaction = None
@@ -317,11 +318,11 @@ class NoobConfirmation(NoobView):
             self.context = None
             if self.interaction.response.is_done():
                 self.message = await self.interaction.followup.send(
-                    ephemeral=self.ephemeral, view=self, **kwargs
+                    ephemeral=self.ephemeral, **kwargs
                 )
             else:
                 await self.interaction.response.send_message(
-                    ephemeral=self.ephemeral, view=self, **kwargs
+                    ephemeral=self.ephemeral, **kwargs
                 )
                 self.message = await self.interaction.original_response()
 
