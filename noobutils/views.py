@@ -240,7 +240,7 @@ class NoobPaginator(NoobView):
         kwargs = self.get_page_kwargs(self.current_page)
         self.disable_items(len(self.pages))
         if interaction.response.is_done():
-            await interaction.message.edit(**kwargs)
+            await interaction.edit_original_response(**kwargs)
         else:
             await interaction.response.edit_message(**kwargs)
 
@@ -262,12 +262,12 @@ class NoobPaginator(NoobView):
     async def stop_page(
         self, interaction: discord.Interaction[Red], button: discord.ui.Button
     ) -> None:
+        await interaction.response.defer()
         if self.ephemeral:
             for x in self.children:
                 x.disabled = True
-            await interaction.response.edit_message(view=self)
+            await interaction.edit_original_response(view=self)
         else:
-            await interaction.response.defer()
             await interaction.message.delete()
         self.stop()
 
