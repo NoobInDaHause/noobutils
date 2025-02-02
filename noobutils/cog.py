@@ -3,7 +3,7 @@ import logging
 from redbot.core.bot import commands, Config, Red
 from redbot.core.utils import chat_formatting as cf
 
-from typing import List
+from typing import List, Literal
 
 from . import __version__ as __nu_version__
 
@@ -37,6 +37,14 @@ class Cog(commands.Cog):
         self.__author__ = authors
         self.__docs__ = f"https://github.com/NoobInDaHause/NoobCogs/blob/red-3.5/{cog_name.lower()}/README.md"
         self.log = logging.getLogger(f"red.NoobCogs.{cog_name}")
+
+    async def red_delete_data_for_user(
+        self,
+        *,
+        requester: Literal["discord_deleted_user", "owner", "user", "user_strict"],
+        user_id: int
+    ):
+        return await super().red_delete_data_for_user(requester=requester, user_id=user_id)
 
     def format_help_for_context(self, context: commands.Context) -> str:
         plural = "s" if len(self.__author__) > 1 else ""
@@ -78,6 +86,14 @@ class GroupCog(commands.GroupCog):
         self.__author__ = authors
         self.__docs__ = f"https://github.com/NoobInDaHause/NoobCogs/blob/red-3.5/{cog_name.lower()}/README.md"
         self.log = logging.getLogger(f"red.NoobCogs.{cog_name}")
+
+    async def red_delete_data_for_user(
+        self,
+        *,
+        requester: Literal["discord_deleted_user", "owner", "user", "user_strict"],
+        user_id: int
+    ):
+        return await super().red_delete_data_for_user(requester=requester, user_id=user_id)
 
     def format_help_for_context(self, context: commands.Context) -> str:
         plural = "s" if len(self.__author__) > 1 else ""

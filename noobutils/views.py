@@ -6,14 +6,14 @@ import discord
 from redbot.core.bot import commands, Red
 from redbot.core.utils import chat_formatting as cf
 
-from typing import Dict, Union, List, Any, Union, Self
+from typing import Dict, Union, List, Any, Union
 
 from .utility import get_button_colour, access_denied
 from .exceptions import NoContextOrInteractionFound
 
 
 class NoobView(discord.ui.View):
-    children: List[discord.ui.Button[Self]]
+    children: List[discord.ui.Button[NoobView]]
 
     def __init__(
         self,
@@ -63,8 +63,7 @@ class NoobView(discord.ui.View):
     async def on_timeout(self):
         for x in self.children:
             x.disabled = True
-        with contextlib.suppress(discord.errors.HTTPException):
-            await self.message.edit()
+        with contextlib.suppress(discord.errors.HTTPException, discord.errors.NotFound):
             await self.message.edit(
                 content=self.timeout_message or discord.utils.MISSING,
                 embed=None if self.remove_embed_on_timeout else discord.utils.MISSING,
@@ -89,7 +88,7 @@ class PageModal(discord.ui.Modal):
 
 
 class SelectPageButton(discord.ui.Button):
-    view: "NoobPaginator"
+    view: NoobPaginator
 
     def __init__(self, max_page: int):
         super().__init__(style=get_button_colour("grey"), label="Go To Page")
@@ -119,7 +118,7 @@ class SelectPageButton(discord.ui.Button):
 
 
 class SelectPageMenu(discord.ui.Select):
-    view: "NoobPaginator"
+    view: NoobPaginator
 
     def __init__(self, placeholder: str, options: List[discord.SelectOption]):
         super().__init__(
@@ -157,8 +156,9 @@ class NoobPaginator(NoobView):
         self.use_select_menu = use_select_menu
         self.use_page_button = use_page_button
 
+    @staticmethod
     def initialize_pages(
-        self, lst: List[Union[str, discord.Embed]]
+        lst: List[Union[str, discord.Embed]]
     ) -> Dict[str, Union[str, discord.Embed]]:
         pages = {}
 
@@ -328,7 +328,7 @@ class NoobConfirmation(NoobView):
 
     @discord.ui.button(label="Yes", emoji="✔️", style=get_button_colour("green"))
     async def yes_button(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button[Self]
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button[NoobConfirmation]
     ):
         for x in self.children:
             x.disabled = True
@@ -340,7 +340,7 @@ class NoobConfirmation(NoobView):
 
     @discord.ui.button(label="No", emoji="✖️", style=get_button_colour("red"))
     async def no_button(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button[Self]
+        self, interaction: discord.Interaction[Red], button: discord.ui.Button[NoobConfirmation]
     ):
         for x in self.children:
             x.disabled = True

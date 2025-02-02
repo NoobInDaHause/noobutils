@@ -4,7 +4,7 @@ from redbot.core.errors import CogLoadError
 from redbot.core.utils import chat_formatting as cf
 
 from datetime import datetime
-from typing import Union, List
+from typing import Union, List, Literal
 
 from . import raw_version, __version__ as __nu_version__
 from .converters import NoobCoordinate
@@ -46,7 +46,21 @@ def access_denied(text_only=False) -> str:
     )
 
 
-def get_button_colour(colour: str) -> discord.ButtonStyle:
+def get_button_colour(
+    colour: Literal[
+        "blurple",
+        "primary",
+        "secondary",
+        "link",
+        "url",
+        "red",
+        "danger",
+        "green",
+        "success",
+        "grey",
+        "gray",
+    ]
+) -> discord.ButtonStyle:
     valid_colours = {
         "blurple": discord.ButtonStyle.blurple,
         "primary": discord.ButtonStyle.primary,
@@ -65,7 +79,7 @@ def get_button_colour(colour: str) -> discord.ButtonStyle:
     raise ButtonColourNotFound(f'"{colour}" is not a valid button colour.')
 
 
-async def pagify_this(
+def pagify_this(
     big_ass_variable_string: str,
     delims: List[str] = None,
     page_text: str = "Page ({index}/{pages})",
