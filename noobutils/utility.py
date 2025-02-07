@@ -4,9 +4,10 @@ from redbot.core.errors import CogLoadError
 from redbot.core.utils import chat_formatting as cf
 
 from datetime import datetime
+from packaging import version
 from typing import Union, List, Literal
 
-from . import raw_version, __version__ as __nu_version__
+from . import __version__
 from .converters import NoobCoordinate
 from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
@@ -128,19 +129,14 @@ def pagify_this(
 
 
 def version_check(needed_version: str):
-    v = needed_version.split(".")
-    if (
-        int(v[0]) < raw_version["major"]
-        or int(v[1]) < raw_version["minor"]
-        or int(v[2]) < raw_version["patch"]
-    ):
+    if version.parse(__version__) < version.parse(needed_version):
         raise CogLoadError(
             "This cog requires a newer version of noobutils.\n"
-            f"Your system currently has noobutils version: **{__nu_version__}**\n"
+            f"Your system currently has noobutils version: **{__version__}**\n"
             f"The cog requires noobutils version: **{needed_version}** or newer\n"
             "Please run the command `[p]pipinstall --force-reinstall --no-cache-dir "
-            "git+https://github.com/NoobInDaHause/noobutils.git` then restart your bot and then load the cog."
-            "\nIf problem still continues please report it to the cog author via [GitHub]"
-            "(https://github.com/NoobInDaHause/noobutils) or join the discord server [here](https://"
+            "git+https://github.com/NoobInDaHause/noobutils.git` then restart your bot and load the cog."
+            "\nIf the problem still continues, please report it to the cog author via [GitHub] "
+            "(https://github.com/NoobInDaHause/noobutils) or join the Discord server [here](https://"
             "discord.gg/Hs2H9sQejw)."
         )
