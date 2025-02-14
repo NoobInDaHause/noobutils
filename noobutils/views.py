@@ -38,12 +38,6 @@ class NoobView(discord.ui.View):
     async def start(self) -> Any:
         pass
 
-    def stop(self) -> None:
-        self.context = None
-        self.interaction = None
-        self.message = None
-        return super().stop()
-
     async def interaction_check(self, interaction: discord.Interaction[Red]) -> bool:
         if self.ephemeral and self.interaction:
             return True
@@ -87,7 +81,7 @@ class PageModal(discord.ui.Modal):
         )
 
 
-class SelectPageButton(discord.ui.Button):
+class SelectPageButton(discord.ui.Button["NoobPaginator"]):
     view: NoobPaginator
 
     def __init__(self, max_page: int):
