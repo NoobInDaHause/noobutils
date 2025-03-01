@@ -3,12 +3,11 @@ from __future__ import annotations
 import contextlib
 import discord
 
-from redbot.core.bot import commands, Red
 from redbot.core.utils import chat_formatting as cf
 
 from typing import Dict, Union, List, Any, Union
 
-from .utility import get_button_colour, access_denied
+from .utility import get_button_colour, access_denied, Context, Interaction
 from .exceptions import NoContextOrInteractionFound
 
 
@@ -18,7 +17,7 @@ class NoobView(discord.ui.View):
     def __init__(
         self,
         *,
-        obj: Union[commands.Context, discord.Interaction[Red]],
+        obj: Union[Context, Interaction],
         timeout_message: str = None,
         remove_embed_on_timeout: bool = False,
         access_denied_as_video: bool = True,
@@ -26,9 +25,9 @@ class NoobView(discord.ui.View):
         timeout: float = 180,
     ):
         super().__init__(timeout=timeout)
-        ctx = isinstance(obj, commands.Context)
-        self.context: commands.Context = obj if ctx else None
-        self.interaction: discord.Interaction[Red] = None if ctx else obj
+        ctx = isinstance(obj, Context)
+        self.context: Context = obj if ctx else None
+        self.interaction: Interaction = None if ctx else obj
         self.message: discord.Message = None
         self.ephemeral = is_ephemeral
         self.timeout_message = timeout_message
@@ -38,16 +37,14 @@ class NoobView(discord.ui.View):
     async def start(self) -> Any:
         pass
 
-    async def interaction_check(self, interaction: discord.Interaction[Red]) -> bool:
-        if self.ephemeral and self.interaction:
-            return True
-        if not interaction.user:
-            return True
-        if await interaction.client.is_owner(interaction.user):
-            return True
-        if self.context and (self.context.author.id == interaction.user.id):
-            return True
-        if self.interaction and (self.interaction.user.id == interaction.user.id):
+    async def interaction_check(self, interaction: Interaction) -> bool:
+        author = getattr(self.context, "author", self.interaction.user)
+        if (
+            (self.ephemeral and self.interaction)
+            or not author
+            or await interaction.client.is_owner(interaction.user)
+            or (author.id == interaction.user.id)
+        ):
             return True
         await interaction.response.send_message(
             content=access_denied(not self.access_denied_as_video), ephemeral=True
@@ -71,7 +68,7 @@ class PageModal(discord.ui.Modal):
 
     page = discord.ui.TextInput(min_length=1, label="Input a number.")
 
-    async def on_submit(self, interaction: discord.Interaction[Red]):
+    async def on_submit(self, interaction: Interaction):
         await interaction.response.defer()
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
@@ -82,13 +79,11 @@ class PageModal(discord.ui.Modal):
 
 
 class SelectPageButton(discord.ui.Button["NoobPaginator"]):
-    view: NoobPaginator
-
     def __init__(self, max_page: int):
         super().__init__(style=get_button_colour("grey"), label="Go To Page")
         self.max_page = max_page
 
-    async def callback(self, interaction: discord.Interaction[Red]) -> None:
+    async def callback(self, interaction: Interaction) -> None:
         modal = PageModal()
         await interaction.response.send_modal(modal)
         await modal.wait()
@@ -111,15 +106,13 @@ class SelectPageButton(discord.ui.Button["NoobPaginator"]):
         await self.view.update_page(interaction)
 
 
-class SelectPageMenu(discord.ui.Select):
-    view: NoobPaginator
-
+class SelectPageMenu(discord.ui.Select["NoobPaginator"]):
     def __init__(self, placeholder: str, options: List[discord.SelectOption]):
         super().__init__(
             placeholder=placeholder, min_values=1, max_values=1, options=options
         )
 
-    async def callback(self, interaction: discord.Interaction[Red]) -> None:
+    async def callback(self, interaction: Interaction) -> None:
         self.view.current_page = int(self.values[0])
         await self.view.update_page(interaction)
 
@@ -128,7 +121,7 @@ class NoobPaginator(NoobView):
     def __init__(
         self,
         *,
-        obj: Union[commands.Context, discord.Interaction[Red]],
+        obj: Union[Context, Interaction],
         pages: List[Union[str, discord.Embed]],
         use_select_menu: bool = False,
         use_page_button: bool = True,
@@ -230,7 +223,7 @@ class NoobPaginator(NoobView):
                 "Cannot start a paginator without a context or interaction."
             )
 
-    async def update_page(self, interaction: discord.Interaction[Red]) -> None:
+    async def update_page(self, interaction: Interaction) -> None:
         kwargs = self.get_page_kwargs(self.current_page)
         self.disable_items(len(self.pages))
         if interaction.response.is_done():
@@ -240,21 +233,21 @@ class NoobPaginator(NoobView):
 
     @discord.ui.button(emoji="⏪", style=get_button_colour("grey"))
     async def first_page(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button
+        self, interaction: Interaction, button: discord.ui.Button
     ) -> None:
         self.current_page = 0
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="◀️", style=get_button_colour("grey"))
     async def previous_page(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button
+        self, interaction: Interaction, button: discord.ui.Button
     ) -> None:
         self.current_page -= 1
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="✖️", style=get_button_colour("red"))
     async def stop_page(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button
+        self, interaction: Interaction, button: discord.ui.Button
     ) -> None:
         await interaction.response.defer()
         if self.ephemeral:
@@ -267,14 +260,14 @@ class NoobPaginator(NoobView):
 
     @discord.ui.button(emoji="▶️", style=get_button_colour("grey"))
     async def next_page(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button
+        self, interaction: Interaction, button: discord.ui.Button
     ) -> None:
         self.current_page += 1
         await self.update_page(interaction)
 
     @discord.ui.button(emoji="⏩", style=get_button_colour("grey"))
     async def last_page(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button
+        self, interaction: Interaction, button: discord.ui.Button
     ) -> None:
         self.current_page = self.pages_length - 1
         await self.update_page(interaction)
@@ -284,7 +277,7 @@ class NoobConfirmation(NoobView):
     def __init__(
         self,
         *,
-        obj: Union[commands.Context, discord.Interaction[Red]],
+        obj: Union[Context, Interaction],
         confirm_action: str,
         access_denied_as_video: bool = True,
         is_ephemeral: bool = False,
@@ -322,7 +315,9 @@ class NoobConfirmation(NoobView):
 
     @discord.ui.button(label="Yes", emoji="✔️", style=get_button_colour("green"))
     async def yes_button(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button[NoobConfirmation]
+        self,
+        interaction: Interaction,
+        button: discord.ui.Button[NoobConfirmation],
     ):
         for x in self.children:
             x.disabled = True
@@ -334,7 +329,9 @@ class NoobConfirmation(NoobView):
 
     @discord.ui.button(label="No", emoji="✖️", style=get_button_colour("red"))
     async def no_button(
-        self, interaction: discord.Interaction[Red], button: discord.ui.Button[NoobConfirmation]
+        self,
+        interaction: Interaction,
+        button: discord.ui.Button[NoobConfirmation],
     ):
         for x in self.children:
             x.disabled = True
