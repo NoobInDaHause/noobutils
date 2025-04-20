@@ -26,7 +26,7 @@ command = commands.command
 group = commands.group
 hybrid_command = commands.hybrid_command
 hybrid_group = commands.hybrid_group
-app_command = app_commands.command
+application_command = app_commands.command
 loop = tasks.loop
 listener = commands.Cog.listener
 
@@ -83,7 +83,7 @@ def get_button_colour(
         "success",
         "grey",
         "gray",
-    ]
+    ],
 ) -> discord.ButtonStyle:
     valid_colours = {
         "blurple": discord.ButtonStyle.blurple,

@@ -38,7 +38,7 @@ class NoobView(discord.ui.View):
         pass
 
     async def interaction_check(self, interaction: Interaction) -> bool:
-        author = getattr(self.context, "author", self.interaction.user)
+        author = self.context.author if self.context else self.interaction.user
         if (
             (self.ephemeral and self.interaction)
             or not author

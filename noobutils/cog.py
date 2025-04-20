@@ -1,3 +1,4 @@
+import contextlib
 import logging
 
 from redbot.core.bot import commands, Config, Red
@@ -55,6 +56,14 @@ class Cog(commands.Cog):
             f"Cog Documentation: [[Click here]]({self.__docs__})\n"
             f"Utils Version: **{__nu_version__}**"
         )
+
+    # async def cog_load(self):
+    #     with contextlib.suppress(RuntimeError):
+    #         self.bot.add_dev_env_value(self._cog_name.lower(), lambda _: self)
+
+    # async def cog_unload(self):
+    #     with contextlib.suppress(RuntimeError):
+    #         self.bot.remove_dev_env_value(self._cog_name.lower())
 
 
 class GroupCog(commands.GroupCog):
