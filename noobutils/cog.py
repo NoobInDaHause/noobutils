@@ -1,5 +1,6 @@
 import contextlib
 import logging
+import requests
 
 from redbot.core.bot import commands, Config, Red
 from redbot.core.utils import chat_formatting as cf
@@ -7,6 +8,7 @@ from redbot.core.utils import chat_formatting as cf
 from typing import Literal
 
 from . import CogLoadError, __version__ as __nu_version__
+from .utility import version_check
 
 
 class Cog(commands.Cog):
@@ -35,7 +37,21 @@ class Cog(commands.Cog):
 
     @property
     def utils_version(self) -> str:
-        return __nu_version__  # This is temporary for now.
+        response = requests.get(
+            "https://raw.githubusercontent.com/NoobInDaHause/noobutils/refs/heads/main/version.txt"
+        )
+
+        if response.status_code == 200:
+            u_v = response.text
+            try:
+                version_check(u_v)
+                outdated = "No"
+            except CogLoadError:
+                outdated = f"Yes, {u_v} available."
+        else:
+            outdated = "Unknown"
+
+        return f"{__nu_version__} (Outdated: {outdated})"
 
     async def red_delete_data_for_user(
         self,
@@ -99,7 +115,21 @@ class GroupCog(commands.GroupCog):
 
     @property
     def utils_version(self) -> str:
-        return __nu_version__  # This is temporary for now.
+        response = requests.get(
+            "https://raw.githubusercontent.com/NoobInDaHause/noobutils/refs/heads/main/version.txt"
+        )
+
+        if response.status_code == 200:
+            u_v = response.text
+            try:
+                version_check(u_v)
+                outdated = "No"
+            except CogLoadError:
+                outdated = f"Yes, {u_v} available."
+        else:
+            outdated = "Unknown"
+
+        return f"{__nu_version__} (Outdated: {outdated})"
 
     async def red_delete_data_for_user(
         self,
