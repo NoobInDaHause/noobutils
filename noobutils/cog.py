@@ -4,18 +4,15 @@ import logging
 from redbot.core.bot import commands, Config, Red
 from redbot.core.utils import chat_formatting as cf
 
-from typing import List, Literal
+from typing import Literal
 
-from . import __version__ as __nu_version__
+from . import CogLoadError, __version__ as __nu_version__
 
 
 class Cog(commands.Cog):
     def __init__(
         self,
         bot: Red,
-        cog_name: str,
-        version: str,
-        authors: List[str],
         use_config: bool = False,
         identifier: int = 1234567890,
         force_registration: bool = False,
@@ -29,50 +26,57 @@ class Cog(commands.Cog):
                 None,
                 identifier=identifier,
                 force_registration=force_registration,
-                cog_name=cog_name,
+                cog_name=self.__class__.__name__,
             )
             if use_config
             else None
         )
-        self.__version__ = version
-        self.__author__ = authors
-        self.__docs__ = f"https://github.com/NoobInDaHause/NoobCogs/blob/red-3.5/{cog_name.lower()}/README.md"
-        self.log = logging.getLogger(f"red.NoobCogs.{cog_name}")
+        self.log = logging.getLogger(f"red.NoobCogs.{self.__class__.__name__}")
+
+    @property
+    def utils_version(self) -> str:
+        return __nu_version__  # This is temporary for now.
 
     async def red_delete_data_for_user(
         self,
         *,
         requester: Literal["discord_deleted_user", "owner", "user", "user_strict"],
-        user_id: int
+        user_id: int,
     ):
-        return await super().red_delete_data_for_user(requester=requester, user_id=user_id)
-
-    def format_help_for_context(self, context: commands.Context) -> str:
-        plural = "s" if len(self.__author__) > 1 else ""
-        return (
-            f"{super().format_help_for_context(context)}\n\n"
-            f"Cog Version: **{self.__version__}**\n"
-            f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in self.__author__])}\n"
-            f"Cog Documentation: [[Click here]]({self.__docs__})\n"
-            f"Utils Version: **{__nu_version__}**"
+        return await super().red_delete_data_for_user(
+            requester=requester, user_id=user_id
         )
 
-    # async def cog_load(self):
-    #     with contextlib.suppress(RuntimeError):
-    #         self.bot.add_dev_env_value(self._cog_name.lower(), lambda _: self)
+    def format_help_for_context(self, context: commands.Context) -> str:
+        try:
+            authors = getattr(self, "__authors__")
+            version = getattr(self, "__version__")
+        except AttributeError as e:
+            raise CogLoadError(
+                "'__authors__' and '__version__' attributes are required from the cog."
+            ) from e
 
-    # async def cog_unload(self):
-    #     with contextlib.suppress(RuntimeError):
-    #         self.bot.remove_dev_env_value(self._cog_name.lower())
+        plural = "s" if len(authors) > 1 else ""
+        return (
+            f"{super().format_help_for_context(context)}\n\n"
+            f"Cog Version: **{version}**\n"
+            f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in authors])}\n"
+            f"Utils Version: **{self.utils_version}**"
+        )
+
+    async def cog_load(self):
+        with contextlib.suppress(RuntimeError):
+            self.bot.add_dev_env_value(self.__class__.__name__.lower(), lambda _: self)
+
+    async def cog_unload(self):
+        with contextlib.suppress(RuntimeError):
+            self.bot.remove_dev_env_value(self.__class__.__name__.lower())
 
 
 class GroupCog(commands.GroupCog):
     def __init__(
         self,
         bot: Red,
-        cog_name: str,
-        version: str,
-        authors: List[str],
         use_config: bool = False,
         identifier: int = 1234567890,
         force_registration: bool = False,
@@ -86,30 +90,48 @@ class GroupCog(commands.GroupCog):
                 None,
                 identifier=identifier,
                 force_registration=force_registration,
-                cog_name=cog_name,
+                cog_name=self.__class__.__name__,
             )
             if use_config
             else None
         )
-        self.__version__ = version
-        self.__author__ = authors
-        self.__docs__ = f"https://github.com/NoobInDaHause/NoobCogs/blob/red-3.5/{cog_name.lower()}/README.md"
-        self.log = logging.getLogger(f"red.NoobCogs.{cog_name}")
+        self.log = logging.getLogger(f"red.NoobCogs.{self.__class__.__name__}")
+
+    @property
+    def utils_version(self) -> str:
+        return __nu_version__  # This is temporary for now.
 
     async def red_delete_data_for_user(
         self,
         *,
         requester: Literal["discord_deleted_user", "owner", "user", "user_strict"],
-        user_id: int
+        user_id: int,
     ):
-        return await super().red_delete_data_for_user(requester=requester, user_id=user_id)
+        return await super().red_delete_data_for_user(
+            requester=requester, user_id=user_id
+        )
 
     def format_help_for_context(self, context: commands.Context) -> str:
-        plural = "s" if len(self.__author__) > 1 else ""
+        try:
+            authors = getattr(self, "__authors__")
+            version = getattr(self, "__version__")
+        except AttributeError as e:
+            raise CogLoadError(
+                "'__authors__' and '__version__' attributes are required from the cog."
+            ) from e
+
+        plural = "s" if len(authors) > 1 else ""
         return (
             f"{super().format_help_for_context(context)}\n\n"
-            f"Cog Version: **{self.__version__}**\n"
-            f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in self.__author__])}\n"
-            f"Cog Documentation: [[Click here]]({self.__docs__})\n"
-            f"Utils Version: **{__nu_version__}**"
+            f"Cog Version: **{version}**\n"
+            f"Cog Author{plural}: {cf.humanize_list([f'**{auth}**' for auth in authors])}\n"
+            f"Utils Version: **{self.utils_version}**"
         )
+
+    async def cog_load(self):
+        with contextlib.suppress(RuntimeError):
+            self.bot.add_dev_env_value(self.__class__.__name__.lower(), lambda _: self)
+
+    async def cog_unload(self):
+        with contextlib.suppress(RuntimeError):
+            self.bot.remove_dev_env_value(self.__class__.__name__.lower())
