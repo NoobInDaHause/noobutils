@@ -7,8 +7,8 @@ from redbot.core.utils import chat_formatting as cf
 
 from typing import Literal
 
-from . import CogLoadError, __version__ as __nu_version__
-from .utility import version_check
+from . import __version__ as __nu_version__
+from .utility import CogLoadError, version_check
 
 
 class Cog(commands.Cog):
