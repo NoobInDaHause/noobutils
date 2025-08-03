@@ -1,15 +1,9 @@
 import discord
-import pathlib
 
-from redbot.core.bot import app_commands, commands, Red
 from redbot.core.errors import CogLoadError
-from redbot.core.utils import (
-    chat_formatting as cf,
-    get_end_user_data_statement_or_raise,
-)
+from redbot.core.utils import chat_formatting as cf
 
 from datetime import datetime
-from discord.ext import tasks
 from packaging import version
 from typing import Union, List, Literal
 
@@ -18,28 +12,11 @@ from .converters import NoobCoordinate
 from .exceptions import ButtonColourNotFound, MemberOrGuildNotFound
 
 
-Application_Group = app_commands.Group
-Context = commands.Context
-Interaction = discord.Interaction[Red]
-
-command = commands.command
-group = commands.group
-hybrid_command = commands.hybrid_command
-hybrid_group = commands.hybrid_group
-application_command = app_commands.command
-loop = tasks.loop
-listener = commands.Cog.listener
-
-
-def get_eud(file: Union[pathlib.Path, str]) -> str:
-    return get_end_user_data_statement_or_raise(file)
-
-
 def is_have_avatar(
     thing: Union[
         discord.Member, discord.User, discord.Guild, discord.ClientUser
     ] = None,
-    display_av: bool = False,
+    display_av=False,
 ) -> str:
     if thing is None:
         return ""
@@ -59,7 +36,7 @@ def is_have_avatar(
         raise MemberOrGuildNotFound(f'Member or Guild "{thing}" was not found.')
 
 
-def access_denied(text_only: bool = False) -> str:
+def access_denied(text_only=False) -> str:
     return (
         "Access Denied."
         if text_only
@@ -83,7 +60,7 @@ def get_button_colour(
         "success",
         "grey",
         "gray",
-    ],
+    ]
 ) -> discord.ButtonStyle:
     valid_colours = {
         "blurple": discord.ButtonStyle.blurple,
@@ -159,7 +136,7 @@ def version_check(needed_version: str):
             f"The cog requires noobutils version: **{needed_version}** or newer\n"
             "Please run the command `[p]pipinstall --force-reinstall --no-cache-dir "
             "git+https://github.com/NoobInDaHause/noobutils.git` then restart your bot and load the cog."
-            "\nIf the problem still continues, please report it to the cog author via [GitHub]"
+            "\nIf the problem still continues, please report it to the cog author via [GitHub] "
             "(https://github.com/NoobInDaHause/noobutils) or join the Discord server [here](https://"
             "discord.gg/Hs2H9sQejw)."
         )

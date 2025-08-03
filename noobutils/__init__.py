@@ -1,4 +1,4 @@
-__version__ = "1.13.2"
+__version__ = "1.12.3"
 
 from .cog import *
 from .converters import *
